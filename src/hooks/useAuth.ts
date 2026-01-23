@@ -1,4 +1,11 @@
-import { useAuth } from '../contexts/AuthContext';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
+import type { AuthContextType } from '../contexts/types';
 
-// Re-exportando o hook do contexto para facilitar o uso
-export { useAuth };
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  }
+  return context;
+};

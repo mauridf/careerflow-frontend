@@ -1,21 +1,10 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { type User, type LoginRequest, type RegisterRequest, type LoginResponse, type RegisterResponse } from '../types';
-import { api } from '../api/apiClient';
-import { API_ENDPOINTS, APP_CONSTANTS } from '../utils/constants';
+import { createContext, useState, useEffect, type ReactNode } from 'react';
+import { type User, type LoginRequest, type RegisterRequest } from '../types';
+import { authService } from '../api/authService';
+import { APP_CONSTANTS } from '../utils/constants';
+import type { AuthContextType } from './types';
 
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-  login: (credentials: LoginRequest) => Promise<void>;
-  register: (userData: RegisterRequest) => Promise<void>;
-  logout: () => void;
-  clearError: () => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -55,11 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setError(null);
     
     try {
-      const response = await api.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
-      
-      // A API retorna diretamente LoginResponse, não dentro de data
-      // Vamos ajustar baseado na estrutura real da API
-      const loginData = response as unknown as LoginResponse;
+      const loginData = await authService.login(credentials);
       
       // Salvar token e usuário
       localStorage.setItem(APP_CONSTANTS.TOKEN_KEY, loginData.token);
@@ -83,10 +68,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setError(null);
     
     try {
-      const response = await api.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, userData);
-      
-      // A API retorna diretamente RegisterResponse
-      const registerData = response as unknown as RegisterResponse;
+      const registerData = await authService.register(userData);
       
       console.log('Usuário registrado com sucesso:', registerData);
       
@@ -131,13 +113,4 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-// Hook personalizado para usar o contexto
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
-  }
-  return context;
 };

@@ -1,4 +1,4 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
 import { APP_CONSTANTS } from '../utils/constants';
 
 // Definindo os tipos para as respostas da API
@@ -33,7 +33,7 @@ const apiClient: AxiosInstance = axios.create({
 
 // Interceptor para requisições
 apiClient.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     // Aqui podemos adicionar o token de autenticação no futuro
     const token = localStorage.getItem(APP_CONSTANTS.TOKEN_KEY);
     if (token && config.headers) {
@@ -95,29 +95,22 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Tipos para funções da API
-export type ApiGetFunction = <T>(url: string, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
-export type ApiPostFunction = <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
-export type ApiPutFunction = <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
-export type ApiDeleteFunction = <T>(url: string, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
-export type ApiPatchFunction = <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
-
 // Funções utilitárias para métodos HTTP
 export const api = {
-  get: <T>(url: string, config?: AxiosRequestConfig) => 
-    apiClient.get<ApiResponse<T>>(url, config).then(res => res.data),
+  get: <T>(url: string, config?: InternalAxiosRequestConfig) => 
+    apiClient.get<T>(url, config).then(res => res.data),
   
-  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => 
-    apiClient.post<ApiResponse<T>>(url, data, config).then(res => res.data),
+  post: <T>(url: string, data?: unknown, config?: InternalAxiosRequestConfig) => 
+    apiClient.post<T>(url, data, config).then(res => res.data),
   
-  put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => 
-    apiClient.put<ApiResponse<T>>(url, data, config).then(res => res.data),
+  put: <T>(url: string, data?: unknown, config?: InternalAxiosRequestConfig) => 
+    apiClient.put<T>(url, data, config).then(res => res.data),
   
-  delete: <T>(url: string, config?: AxiosRequestConfig) => 
-    apiClient.delete<ApiResponse<T>>(url, config).then(res => res.data),
+  delete: <T>(url: string, config?: InternalAxiosRequestConfig) => 
+    apiClient.delete<T>(url, config).then(res => res.data),
   
-  patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => 
-    apiClient.patch<ApiResponse<T>>(url, data, config).then(res => res.data),
+  patch: <T>(url: string, data?: unknown, config?: InternalAxiosRequestConfig) => 
+    apiClient.patch<T>(url, data, config).then(res => res.data),
 };
 
 export default apiClient;

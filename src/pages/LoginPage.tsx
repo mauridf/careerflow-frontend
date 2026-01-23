@@ -11,7 +11,7 @@ import {
   IconButton
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 

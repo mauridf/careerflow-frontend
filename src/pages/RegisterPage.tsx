@@ -11,10 +11,11 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel
+  InputLabel,
+  type SelectChangeEvent
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import { authService } from '../api/authService';
 
@@ -67,9 +68,8 @@ const RegisterPage = () => {
     return () => clearTimeout(timer);
   }, [formData.email]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const name = e.target.name as string;
-    const value = e.target.value as string;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     
     setFormData(prev => ({
       ...prev,
@@ -92,6 +92,23 @@ const RegisterPage = () => {
     // Limpar erro geral
     if (error) {
       clearError();
+    }
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent) => {
+    const { name, value } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Limpar erro específico
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
     }
   };
 
@@ -326,7 +343,7 @@ const RegisterPage = () => {
                 id="state"
                 name="state"
                 value={formData.state}
-                onChange={handleChange}
+                onChange={handleSelectChange}
                 label="Estado"
                 disabled={isLoading}
               >
@@ -338,7 +355,7 @@ const RegisterPage = () => {
                 ))}
               </Select>
               {validationErrors.state && (
-                <Typography variant="caption" color="error">
+                <Typography variant="caption" color="error" sx={{ ml: 2, mt: 0.5 }}>
                   {validationErrors.state}
                 </Typography>
               )}
