@@ -1,8 +1,8 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosResponse, type AxiosError } from 'axios';
 import { APP_CONSTANTS } from '../utils/constants';
 
 // Definindo os tipos para as respostas da API
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T;
   message?: string;
   success: boolean;
@@ -32,50 +32,19 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 // Interceptor para requisições
-apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    console.log(`🟢 [API Response] ${response.status} ${response.config.url}`);
-    return response;
-  },
-  (error: AxiosError) => {
-    if (error.response) {
-      console.error('🔴 [API Response Error]', {
-        status: error.response.status,
-        data: error.response.data,
-        url: error.config?.url,
-      });
-      
-      // Tratamento específico para erros 400 (Bad Request)
-      if (error.response.status === 400) {
-        const errorData = error.response.data as any;
-        // Podemos extrair mensagens de validação específicas
-        if (errorData.errors) {
-          console.log('Erros de validação:', errorData.errors);
-        }
-      }
-      
-      switch (error.response.status) {
-        case 401:
-          localStorage.removeItem(APP_CONSTANTS.TOKEN_KEY);
-          localStorage.removeItem(APP_CONSTANTS.USER_KEY);
-          window.location.href = '/login';
-          break;
-        case 403:
-          console.warn('Acesso proibido');
-          break;
-        case 404:
-          console.warn('Recurso não encontrado');
-          break;
-        case 500:
-          console.error('Erro interno do servidor');
-          break;
-      }
-    } else if (error.request) {
-      console.error('🔴 [API No Response] A API pode estar offline ou a URL está incorreta:', error.request);
-    } else {
-      console.error('🔴 [API Request Setup Error]', error.message);
+apiClient.interceptors.request.use(
+  (config: AxiosRequestConfig) => {
+    // Aqui podemos adicionar o token de autenticação no futuro
+    const token = localStorage.getItem(APP_CONSTANTS.TOKEN_KEY);
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     
+    console.log(`🔵 [API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    return config;
+  },
+  (error: AxiosError) => {
+    console.error('🔴 [API Request Error]', error);
     return Promise.reject(error);
   }
 );
@@ -100,7 +69,8 @@ apiClient.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // Não autorizado - redirecionar para login
-          localStorage.removeItem('access_token');
+          localStorage.removeItem(APP_CONSTANTS.TOKEN_KEY);
+          localStorage.removeItem(APP_CONSTANTS.USER_KEY);
           window.location.href = '/login';
           break;
         case 403:
@@ -125,21 +95,28 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Tipos para funções da API
+export type ApiGetFunction = <T>(url: string, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
+export type ApiPostFunction = <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
+export type ApiPutFunction = <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
+export type ApiDeleteFunction = <T>(url: string, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
+export type ApiPatchFunction = <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => Promise<ApiResponse<T>>;
+
 // Funções utilitárias para métodos HTTP
 export const api = {
   get: <T>(url: string, config?: AxiosRequestConfig) => 
     apiClient.get<ApiResponse<T>>(url, config).then(res => res.data),
   
-  post: <T>(url: string, data?: any, config?: AxiosRequestConfig) => 
+  post: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => 
     apiClient.post<ApiResponse<T>>(url, data, config).then(res => res.data),
   
-  put: <T>(url: string, data?: any, config?: AxiosRequestConfig) => 
+  put: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => 
     apiClient.put<ApiResponse<T>>(url, data, config).then(res => res.data),
   
   delete: <T>(url: string, config?: AxiosRequestConfig) => 
     apiClient.delete<ApiResponse<T>>(url, config).then(res => res.data),
   
-  patch: <T>(url: string, data?: any, config?: AxiosRequestConfig) => 
+  patch: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) => 
     apiClient.patch<ApiResponse<T>>(url, data, config).then(res => res.data),
 };
 

@@ -51,7 +51,7 @@ export interface AuthState {
   error: string | null;
 }
 
-// Tipos para informações profissionais (serão expandidos depois)
+// Tipos para informações profissionais
 export interface ProfessionalInfo {
   id: string;
   userId: string;
@@ -59,9 +59,9 @@ export interface ProfessionalInfo {
   socials?: SocialLink[];
   skills?: Skill[];
   education?: Education[];
-//   certifications?: Certification[];
-//   languages?: Language[];
-//   experiences?: Experience[];
+  certifications?: Certification[];
+  languages?: Language[];
+  experiences?: Experience[];
 }
 
 export interface SocialLink {
@@ -85,4 +85,32 @@ export interface Education {
   endDate?: string;
   isCurrent: boolean;
   description?: string;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  issuingOrganization: string;
+  issueDate: string;
+  expirationDate?: string;
+  credentialId?: string;
+  credentialUrl?: string;
+}
+
+export interface Language {
+  id: string;
+  name: string;
+  level: 'Basic' | 'Intermediate' | 'Advanced' | 'Native';
+}
+
+export interface Experience {
+  id: string;
+  title: string;
+  company: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent: boolean;
+  description?: string;
+  achievements?: string[];
 }

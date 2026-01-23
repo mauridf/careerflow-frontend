@@ -7,8 +7,11 @@ import {
   Button, 
   Link, 
   Alert,
-  Grid,
-  CircularProgress
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -64,8 +67,10 @@ const RegisterPage = () => {
     return () => clearTimeout(timer);
   }, [formData.email]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+    const name = e.target.name as string;
+    const value = e.target.value as string;
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -206,54 +211,52 @@ const RegisterPage = () => {
 
         {/* Formulário */}
         <Box component="form" onSubmit={handleSubmit}>
-          <Grid container spacing={2}>
+          {/* Layout com Box em vez de Grid */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            
             {/* Nome completo */}
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="name"
-                label="Nome completo"
-                name="name"
-                autoComplete="name"
-                value={formData.name}
-                onChange={handleChange}
-                error={!!validationErrors.name}
-                helperText={validationErrors.name}
-                disabled={isLoading}
-              />
-            </Grid>
+            <TextField
+              required
+              fullWidth
+              id="name"
+              label="Nome completo"
+              name="name"
+              autoComplete="name"
+              value={formData.name}
+              onChange={handleChange}
+              error={!!validationErrors.name}
+              helperText={validationErrors.name}
+              disabled={isLoading}
+            />
 
             {/* Email */}
-            <Grid item xs={12}>
-              <TextField
-                required
-                fullWidth
-                id="email"
-                label="Email"
-                name="email"
-                autoComplete="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                error={!!validationErrors.email}
-                helperText={
-                  validationErrors.email || 
-                  (isCheckingEmail ? 'Verificando disponibilidade...' : 
-                   emailAvailable === true ? '✓ Email disponível' : 
-                   emailAvailable === false ? '✗ Email já em uso' : '')
-                }
-                disabled={isLoading}
-                InputProps={{
-                  endAdornment: isCheckingEmail ? (
-                    <CircularProgress size={20} />
-                  ) : null,
-                }}
-              />
-            </Grid>
+            <TextField
+              required
+              fullWidth
+              id="email"
+              label="Email"
+              name="email"
+              autoComplete="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              error={!!validationErrors.email}
+              helperText={
+                validationErrors.email || 
+                (isCheckingEmail ? 'Verificando disponibilidade...' : 
+                 emailAvailable === true ? '✓ Email disponível' : 
+                 emailAvailable === false ? '✗ Email já em uso' : '')
+              }
+              disabled={isLoading}
+              InputProps={{
+                endAdornment: isCheckingEmail ? (
+                  <CircularProgress size={20} />
+                ) : null,
+              }}
+            />
 
-            {/* Senha e Confirmar Senha */}
-            <Grid item xs={12} sm={6}>
+            {/* Linha de senhas */}
+            <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
               <TextField
                 required
                 fullWidth
@@ -268,9 +271,7 @@ const RegisterPage = () => {
                 helperText={validationErrors.password || 'Mínimo 6 caracteres'}
                 disabled={isLoading}
               />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
+              
               <TextField
                 required
                 fullWidth
@@ -284,10 +285,10 @@ const RegisterPage = () => {
                 helperText={validationErrors.confirmPassword}
                 disabled={isLoading}
               />
-            </Grid>
+            </Box>
 
-            {/* Telefone */}
-            <Grid item xs={12} sm={6}>
+            {/* Linha de telefone e cidade */}
+            <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
               <TextField
                 fullWidth
                 id="phone"
@@ -301,10 +302,7 @@ const RegisterPage = () => {
                 helperText={validationErrors.phone}
                 disabled={isLoading}
               />
-            </Grid>
-
-            {/* Cidade e Estado */}
-            <Grid item xs={12} sm={6}>
+              
               <TextField
                 required
                 fullWidth
@@ -318,35 +316,34 @@ const RegisterPage = () => {
                 helperText={validationErrors.city}
                 disabled={isLoading}
               />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                required
-                fullWidth
-                select
+            </Box>
+
+            {/* Estado */}
+            <FormControl fullWidth required error={!!validationErrors.state}>
+              <InputLabel id="state-label">Estado</InputLabel>
+              <Select
+                labelId="state-label"
                 id="state"
-                label="Estado"
                 name="state"
-                autoComplete="address-level1"
                 value={formData.state}
                 onChange={handleChange}
-                error={!!validationErrors.state}
-                helperText={validationErrors.state}
+                label="Estado"
                 disabled={isLoading}
-                SelectProps={{
-                  native: true,
-                }}
               >
-                <option value=""></option>
+                <MenuItem value=""><em>Selecione um estado</em></MenuItem>
                 {brazilianStates.map((state) => (
-                  <option key={state} value={state}>
+                  <MenuItem key={state} value={state}>
                     {state}
-                  </option>
+                  </MenuItem>
                 ))}
-              </TextField>
-            </Grid>
-          </Grid>
+              </Select>
+              {validationErrors.state && (
+                <Typography variant="caption" color="error">
+                  {validationErrors.state}
+                </Typography>
+              )}
+            </FormControl>
+          </Box>
 
           {/* Botão de submit */}
           <Button

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, LoginRequest, RegisterRequest, LoginResponse, RegisterResponse } from '../types';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { type User, type LoginRequest, type RegisterRequest, type LoginResponse, type RegisterResponse } from '../types';
 import { api } from '../api/apiClient';
 import { API_ENDPOINTS, APP_CONSTANTS } from '../utils/constants';
 
@@ -57,15 +57,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const response = await api.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
       
+      // A API retorna diretamente LoginResponse, não dentro de data
+      // Vamos ajustar baseado na estrutura real da API
+      const loginData = response as unknown as LoginResponse;
+      
       // Salvar token e usuário
-      localStorage.setItem(APP_CONSTANTS.TOKEN_KEY, response.token);
-      localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(response.user));
+      localStorage.setItem(APP_CONSTANTS.TOKEN_KEY, loginData.token);
+      localStorage.setItem(APP_CONSTANTS.USER_KEY, JSON.stringify(loginData.user));
       
-      setToken(response.token);
-      setUser(response.user);
+      setToken(loginData.token);
+      setUser(loginData.user);
       
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.';
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -81,12 +85,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       const response = await api.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, userData);
       
-      // Após registro bem-sucedido, podemos fazer login automaticamente
-      // ou redirecionar para a página de login
-      console.log('Usuário registrado com sucesso:', response);
+      // A API retorna diretamente RegisterResponse
+      const registerData = response as unknown as RegisterResponse;
       
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Erro ao criar conta. Tente novamente.';
+      console.log('Usuário registrado com sucesso:', registerData);
+      
+    } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erro ao criar conta. Tente novamente.';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
