@@ -4,13 +4,12 @@ export const API_ENDPOINTS = {
     LOGIN: '/Auth/login',
     REGISTER: '/Auth/register',
     CHECK_EMAIL: '/Auth/check-email',
-    // Adicione outros endpoints conforme necessário
   },
-  USERS: {
-    PROFILE: '/users/profile', // Ajuste conforme sua API
-  },
-  PROFESSIONAL_INFO: {
-    BASE: '/professional-info',
+  PROFILE: {
+    SUMMARY: '/Profile/summary',
+    SOCIAL_MEDIAS: '/Profile/social-medias',
+    DASHBOARD_STATS: '/Profile/dashboard/stats',
+    RESUME: '/Profile/resume',
   },
 } as const;
 

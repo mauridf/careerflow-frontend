@@ -12,58 +12,71 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  LinearProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
+import ErrorMessage from '../components/common/ErrorMessage';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';
 import CodeIcon from '@mui/icons-material/Code';
-
-interface Stats {
-  experiences: number;
-  educations: number;
-  skills: number;
-  certificates: number;
-}
+import LanguageIcon from '@mui/icons-material/Language';
+import PersonIcon from '@mui/icons-material/Person';
+import { profileService } from '../api/profileService';
+import type { DashboardStats } from '../types';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const { user, isLoading } = useAuth();
-  const [stats, setStats] = useState<Stats>({
-    experiences: 0,
-    educations: 0,
-    skills: 0,
-    certificates: 0
-  });
+  const { user, isLoading: authLoading } = useAuth();
+  
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Usando useEffect com setTimeout para evitar chamada síncrona
   useEffect(() => {
-    if (user) {
-      // Usando setTimeout para evitar chamada síncrona dentro do effect
-      const timer = setTimeout(() => {
-        setStats({
-          experiences: 2,
-          educations: 1,
-          skills: 8,
-          certificates: 3
-        });
-      }, 0);
+    const loadDashboardData = async () => {
+      if (!user) return;
       
-      return () => clearTimeout(timer);
-    }
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        const statsData = await profileService.getDashboardStats();
+        setStats(statsData);
+      } catch (err: any) {
+        console.error('Erro ao carregar dados do dashboard:', err);
+        setError('Não foi possível carregar os dados do dashboard. Tente novamente.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDashboardData();
   }, [user]);
 
-  if (isLoading || !user) {
-    return <Loading fullScreen message="Carregando dashboard..." />;
+  if (authLoading) {
+    return <Loading fullScreen message="Verificando autenticação..." />;
+  }
+
+  if (!user) {
+    return <Loading fullScreen message="Redirecionando para login..." />;
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR');
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    } catch {
+      return dateString;
+    }
+  };
+
+  const handleRetry = () => {
+    window.location.reload();
   };
 
   return (
@@ -78,68 +91,106 @@ const DashboardPage = () => {
         </Typography>
       </Box>
 
-      {/* Estatísticas usando Box em vez de Grid */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        gap: 3, 
-        mb: 4,
-        justifyContent: { xs: 'center', sm: 'space-between' }
-      }}>
-        {/* Card Experiências */}
-        <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <WorkIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" component="div">
-              {stats.experiences}
-            </Typography>
-            <Typography color="text.secondary">
-              Experiências
-            </Typography>
-          </CardContent>
-        </Card>
-        
-        {/* Card Formações */}
-        <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <SchoolIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" component="div">
-              {stats.educations}
-            </Typography>
-            <Typography color="text.secondary">
-              Formações
-            </Typography>
-          </CardContent>
-        </Card>
-        
-        {/* Card Habilidades */}
-        <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <CodeIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" component="div">
-              {stats.skills}
-            </Typography>
-            <Typography color="text.secondary">
-              Habilidades
-            </Typography>
-          </CardContent>
-        </Card>
-        
-        {/* Card Certificados */}
-        <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
-          <CardContent sx={{ textAlign: 'center' }}>
-            <SchoolIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h5" component="div">
-              {stats.certificates}
-            </Typography>
-            <Typography color="text.secondary">
-              Certificados
-            </Typography>
-          </CardContent>
-        </Card>
-      </Box>
+      {/* Exibir erro se houver */}
+      {error && (
+        <ErrorMessage 
+          message={error}
+          onRetry={handleRetry}
+          fullWidth
+        />
+      )}
 
-      {/* Conteúdo principal usando Box em vez de Grid */}
+      {/* Progresso do perfil */}
+      {stats && (
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Completude do Perfil
+              </Typography>
+              <Typography variant="h6" color="primary">
+                {stats.profileCompleteness}%
+              </Typography>
+            </Box>
+            <LinearProgress 
+              variant="determinate" 
+              value={stats.profileCompleteness} 
+              sx={{ height: 10, borderRadius: 5 }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Complete mais informações para melhorar seu perfil profissional
+            </Typography>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Estatísticas */}
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <Loading message="Carregando estatísticas..." />
+        </Box>
+      ) : stats ? (
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: 3, 
+          mb: 4,
+          justifyContent: { xs: 'center', sm: 'space-between' }
+        }}>
+          {/* Card Experiências */}
+          <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <WorkIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
+              <Typography variant="h5" component="div">
+                {stats.totalExperiences}
+              </Typography>
+              <Typography color="text.secondary">
+                Experiências
+              </Typography>
+            </CardContent>
+          </Card>
+          
+          {/* Card Habilidades */}
+          <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <CodeIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
+              <Typography variant="h5" component="div">
+                {stats.totalSkills}
+              </Typography>
+              <Typography color="text.secondary">
+                Habilidades
+              </Typography>
+            </CardContent>
+          </Card>
+          
+          {/* Card Certificados */}
+          <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <SchoolIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
+              <Typography variant="h5" component="div">
+                {stats.totalCertificates}
+              </Typography>
+              <Typography color="text.secondary">
+                Certificados
+              </Typography>
+            </CardContent>
+          </Card>
+          
+          {/* Card Idiomas */}
+          <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
+            <CardContent sx={{ textAlign: 'center' }}>
+              <LanguageIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
+              <Typography variant="h5" component="div">
+                {stats.totalLanguages}
+              </Typography>
+              <Typography color="text.secondary">
+                Idiomas
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
+      ) : null}
+
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
         {/* Perfil do usuário */}
         <Box sx={{ flex: 1 }}>
@@ -199,6 +250,7 @@ const DashboardPage = () => {
               fullWidth 
               sx={{ mt: 2 }}
               onClick={() => navigate('/profile')}
+              startIcon={<PersonIcon />}
             >
               Editar Perfil
             </Button>
@@ -231,6 +283,7 @@ const DashboardPage = () => {
                   cursor: 'pointer', 
                   '&:hover': { borderColor: 'primary.main' } 
                 }}
+                onClick={() => navigate('/profile?section=experiences')}
               >
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -239,27 +292,6 @@ const DashboardPage = () => {
                   </Box>
                   <Typography variant="body2" color="text.secondary">
                     Adicione suas experiências profissionais
-                  </Typography>
-                </CardContent>
-              </Card>
-              
-              {/* Card Formação */}
-              <Card 
-                variant="outlined" 
-                sx={{ 
-                  flex: '1 1 calc(50% - 16px)', 
-                  minWidth: '250px',
-                  cursor: 'pointer', 
-                  '&:hover': { borderColor: 'primary.main' } 
-                }}
-              >
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <SchoolIcon color="primary" sx={{ mr: 1 }} />
-                    <Typography variant="h6">Formação</Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Adicione sua formação acadêmica
                   </Typography>
                 </CardContent>
               </Card>
@@ -273,6 +305,7 @@ const DashboardPage = () => {
                   cursor: 'pointer', 
                   '&:hover': { borderColor: 'primary.main' } 
                 }}
+                onClick={() => navigate('/profile?section=skills')}
               >
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -294,6 +327,7 @@ const DashboardPage = () => {
                   cursor: 'pointer', 
                   '&:hover': { borderColor: 'primary.main' } 
                 }}
+                onClick={() => navigate('/profile?section=certificates')}
               >
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -305,13 +339,36 @@ const DashboardPage = () => {
                   </Typography>
                 </CardContent>
               </Card>
+              
+              {/* Card Idiomas */}
+              <Card 
+                variant="outlined" 
+                sx={{ 
+                  flex: '1 1 calc(50% - 16px)', 
+                  minWidth: '250px',
+                  cursor: 'pointer', 
+                  '&:hover': { borderColor: 'primary.main' } 
+                }}
+                onClick={() => navigate('/profile?section=languages')}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <LanguageIcon color="primary" sx={{ mr: 1 }} />
+                    <Typography variant="h6">Idiomas</Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    Adicione seus conhecimentos de idiomas
+                  </Typography>
+                </CardContent>
+              </Card>
             </Box>
 
             <Box sx={{ mt: 4, textAlign: 'center' }}>
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={() => navigate('/cv-generator')}
+                onClick={() => navigate('/resume')}
+                sx={{ px: 4 }}
               >
                 Gerar Currículo ATS
               </Button>
@@ -319,6 +376,32 @@ const DashboardPage = () => {
           </Paper>
         </Box>
       </Box>
+
+      {/* Distribuição de habilidades */}
+      {stats?.skillDistribution && stats.skillDistribution.length > 0 && (
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 2, mt: 4 }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            Distribuição de Habilidades
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            {stats.skillDistribution.map((item, index) => (
+              <Card key={index} variant="outlined" sx={{ flex: '1 1 calc(33% - 16px)', minWidth: '200px' }}>
+                <CardContent>
+                  <Typography variant="subtitle1" gutterBottom>
+                    {item.type}
+                  </Typography>
+                  <Typography variant="h5" color="primary">
+                    {item.count}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {item.percentage}% do total
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </Paper>
+      )}
     </Container>
   );
 };

@@ -3,6 +3,8 @@ import HomePage from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
+import ProfilePage from '../pages/ProfilePage';
+// import ResumePage from '../pages/ResumePage';
 import NotFoundPage from '../pages/NotFoundPage';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
@@ -29,6 +31,18 @@ const AppRoutes = () => {
           <DashboardPage />
         </MainLayout>
       } />
+      
+      <Route path="/profile" element={
+        <MainLayout>
+          <ProfilePage />
+        </MainLayout>
+      } />
+      
+      {/* <Route path="/resume" element={
+        <MainLayout>
+          <ResumePage />
+        </MainLayout>
+      } /> */}
       
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
