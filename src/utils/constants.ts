@@ -11,6 +11,10 @@ export const API_ENDPOINTS = {
     DASHBOARD_STATS: '/Profile/dashboard/stats',
     RESUME: '/Profile/resume',
   },
+  SKILLS: {
+    BASE: '/Skills',
+    DISTRIBUTION: '/Skills/distribution',
+  },
 } as const;
 
 // Constantes de aplicação

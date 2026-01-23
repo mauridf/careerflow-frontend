@@ -30,6 +30,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { profileService } from '../api/profileService';
 import ResumeModal from '../components/ResumeModal'; // Importar o modal
 import type { DashboardStats } from '../types';
+import { skillsService } from '../api/skillsService';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -38,7 +39,8 @@ const DashboardPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [resumeModalOpen, setResumeModalOpen] = useState(false); // Estado para o modal
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
+  const [skillDistribution, setSkillDistribution] = useState<SkillDistribution[]>([]);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -48,8 +50,12 @@ const DashboardPage = () => {
       setError(null);
       
       try {
-        const statsData = await profileService.getDashboardStats();
+        const [statsData, distributionData] = await Promise.all([
+          profileService.getDashboardStats(),
+          skillsService.getSkillDistribution(),
+        ]);
         setStats(statsData);
+        setSkillDistribution(distributionData);
       } catch (err: unknown) {
         console.error('Erro ao carregar dados do dashboard:', err);
         setError('Não foi possível carregar os dados do dashboard. Tente novamente.');
@@ -159,14 +165,23 @@ const DashboardPage = () => {
           </Card>
           
           {/* Card Habilidades */}
-          <Card sx={{ flex: '1 1 calc(25% - 24px)', minWidth: '200px' }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <CodeIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-              <Typography variant="h5" component="div">
-                {stats.totalSkills}
-              </Typography>
-              <Typography color="text.secondary">
-                Habilidades
+          <Card 
+              variant="outlined" 
+              sx={{ 
+                flex: '1 1 calc(50% - 16px)', 
+                minWidth: '250px',
+                cursor: 'pointer', 
+                '&:hover': { borderColor: 'primary.main' } 
+              }}
+              onClick={() => navigate('/skills')}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <CodeIcon color="primary" sx={{ mr: 1 }} />
+                <Typography variant="h6">Habilidades</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                Adicione suas habilidades técnicas
               </Typography>
             </CardContent>
           </Card>
@@ -386,13 +401,13 @@ const DashboardPage = () => {
       </Box>
 
       {/* Distribuição de habilidades */}
-      {stats?.skillDistribution && stats.skillDistribution.length > 0 && (
+      {skillDistribution.length > 0 ? (
         <Paper elevation={2} sx={{ p: 3, borderRadius: 2, mt: 4 }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
             Distribuição de Habilidades
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-            {stats.skillDistribution.map((item, index) => (
+            {skillDistribution.map((item, index) => (
               <Card key={index} variant="outlined" sx={{ flex: '1 1 calc(33% - 16px)', minWidth: '200px' }}>
                 <CardContent>
                   <Typography variant="subtitle1" gutterBottom>
@@ -409,7 +424,7 @@ const DashboardPage = () => {
             ))}
           </Box>
         </Paper>
-      )}
+      ) : null}
 
       {/* Modal de Resumo CV */}
       <ResumeModal

@@ -4,6 +4,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
 import ProfilePage from '../pages/ProfilePage';
+import SkillsPage from '../pages/SkillsPage';
 // import ResumePage from '../pages/ResumePage';
 import NotFoundPage from '../pages/NotFoundPage';
 import MainLayout from '../layouts/MainLayout';
@@ -35,6 +36,12 @@ const AppRoutes = () => {
       <Route path="/profile" element={
         <MainLayout>
           <ProfilePage />
+        </MainLayout>
+      } />
+      
+      <Route path="/skills" element={
+        <MainLayout>
+          <SkillsPage />
         </MainLayout>
       } />
       

@@ -239,3 +239,42 @@ export interface SocialMediaRequest {
   platform: string;
   url: string;
 }
+
+// Tipos para Skills
+export interface Skill {
+  id: string;
+  userId: string;
+  name: string;
+  type: string;
+  level: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SkillDistribution {
+  type: string;
+  count: number;
+  percentage: number;
+}
+
+export interface SkillRequest {
+  name: string;
+  type: string;
+  level: string;
+}
+
+// Enums para Skills (baseado nos enums do backend)
+export enum SkillLevel {
+  BASIC = "BASICO",
+  INTERMEDIATE = "INTERMEDIARIO",
+  ADVANCED = "AVANÇADO"
+}
+
+export enum SkillType {
+  BACKEND = "BACKEND",
+  FRONTEND = "FRONTEND",
+  DATABASE = "BANCO DE DADOS",
+  CLOUD_DEVOPS = "CLOUD E DEVOPS",
+  ARCHITECTURE = "ARQUITETURA E PADRÕES",
+  TOOLS = "FERRAMENTAS E OUTRAS TECNOLOGIAS"
+}
