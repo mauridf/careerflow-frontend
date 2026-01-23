@@ -78,7 +78,7 @@ const ProfilePage = () => {
           const summaryData = await profileService.getSummary();
           setSummary(summaryData);
           setSummaryText(summaryData.summary);
-        } catch (err) {
+        } catch {
           // Summary pode não existir ainda
           console.log('Summary não encontrado, criando novo...');
         }
@@ -86,7 +86,7 @@ const ProfilePage = () => {
         // Carregar social medias
         const socialMediasData = await profileService.getSocialMedias();
         setSocialMedias(socialMediasData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Erro ao carregar dados do perfil:', err);
         setError('Não foi possível carregar os dados do perfil. Tente novamente.');
       } finally {
@@ -113,7 +113,7 @@ const ProfilePage = () => {
       setIsEditingSummary(false);
       setSuccessMessage('Resumo profissional salvo com sucesso!');
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
+   } catch (err: unknown) {
       console.error('Erro ao salvar resumo:', err);
       setError('Não foi possível salvar o resumo. Tente novamente.');
     } finally {
@@ -129,7 +129,7 @@ const ProfilePage = () => {
       setDeleteDialog({ open: false, type: 'summary' });
       setSuccessMessage('Resumo profissional excluído com sucesso!');
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao excluir resumo:', err);
       setError('Não foi possível excluir o resumo. Tente novamente.');
     }
@@ -156,7 +156,7 @@ const ProfilePage = () => {
       setNewSocialMedia({ platform: '', url: '' });
       setSuccessMessage('Rede social adicionada com sucesso!');
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao adicionar rede social:', err);
       setError('Não foi possível adicionar a rede social. Tente novamente.');
     } finally {
@@ -171,7 +171,7 @@ const ProfilePage = () => {
       setDeleteDialog({ open: false, type: 'social-media' });
       setSuccessMessage('Rede social excluída com sucesso!');
       setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao excluir rede social:', err);
       setError('Não foi possível excluir a rede social. Tente novamente.');
     }
@@ -242,12 +242,13 @@ const ProfilePage = () => {
         )}
 
         {error && (
-          <ErrorMessage 
-            message={error}
-            onRetry={() => window.location.reload()}
-            fullWidth
-            sx={{ mb: 3 }}
-          />
+            <Box sx={{ mb: 3 }}>
+                <ErrorMessage 
+                    message={error}
+                    onRetry={() => window.location.reload()}
+                    fullWidth
+                />
+            </Box>
         )}
 
         {isLoading ? (

@@ -28,6 +28,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import LanguageIcon from '@mui/icons-material/Language';
 import PersonIcon from '@mui/icons-material/Person';
 import { profileService } from '../api/profileService';
+import ResumeModal from '../components/ResumeModal'; // Importar o modal
 import type { DashboardStats } from '../types';
 
 const DashboardPage = () => {
@@ -37,6 +38,7 @@ const DashboardPage = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false); // Estado para o modal
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -48,7 +50,7 @@ const DashboardPage = () => {
       try {
         const statsData = await profileService.getDashboardStats();
         setStats(statsData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Erro ao carregar dados do dashboard:', err);
         setError('Não foi possível carregar os dados do dashboard. Tente novamente.');
       } finally {
@@ -77,6 +79,12 @@ const DashboardPage = () => {
 
   const handleRetry = () => {
     window.location.reload();
+  };
+
+  const handleGenerateATS = () => {
+    setResumeModalOpen(false);
+    // Lógica para gerar CV ATS
+    alert('Funcionalidade de gerar CV ATS será implementada em breve!');
   };
 
   return (
@@ -367,7 +375,7 @@ const DashboardPage = () => {
               <Button 
                 variant="contained" 
                 size="large"
-                onClick={() => navigate('/resume')}
+                onClick={() => setResumeModalOpen(true)}
                 sx={{ px: 4 }}
               >
                 Gerar Currículo ATS
@@ -402,6 +410,13 @@ const DashboardPage = () => {
           </Box>
         </Paper>
       )}
+
+      {/* Modal de Resumo CV */}
+      <ResumeModal
+        open={resumeModalOpen}
+        onClose={() => setResumeModalOpen(false)}
+        onGenerateATS={handleGenerateATS}
+      />
     </Container>
   );
 };

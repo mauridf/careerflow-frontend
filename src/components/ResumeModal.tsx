@@ -48,7 +48,7 @@ const ResumeModal = ({ open, onClose, onGenerateATS }: ResumeModalProps) => {
     try {
       const data = await profileService.getResume();
       setResumeData(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao carregar dados do currículo:', err);
       setError('Não foi possível carregar os dados do currículo. Tente novamente.');
     } finally {
