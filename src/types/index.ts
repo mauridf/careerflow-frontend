@@ -1,12 +1,13 @@
-// Tipos de usuário
+// Tipos de usuário baseados na API
 export interface User {
   id: string;
+  name: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  isEmailConfirmed: boolean;
+  phone: string;
+  city: string;
+  state: string;
+  photoPath: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 // Tipos para autenticação
@@ -15,21 +16,42 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface LoginResponse {
+  token: string;
+  user: User;
+  expiresAt: string;
+}
+
 export interface RegisterRequest {
+  name: string;
   email: string;
   password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
+  phone: string;
+  city: string;
+  state: string;
 }
 
-export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
+export interface RegisterResponse {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  photoPath: string;
+  createdAt: string;
 }
 
-// Tipos para informações profissionais (serão expandidos)
+// Estado de autenticação
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
+
+// Tipos para informações profissionais (serão expandidos depois)
 export interface ProfessionalInfo {
   id: string;
   userId: string;
@@ -37,9 +59,9 @@ export interface ProfessionalInfo {
   socials?: SocialLink[];
   skills?: Skill[];
   education?: Education[];
-  certifications?: Certification[];
-  languages?: Language[];
-  experiences?: Experience[];
+//   certifications?: Certification[];
+//   languages?: Language[];
+//   experiences?: Experience[];
 }
 
 export interface SocialLink {
@@ -64,5 +86,3 @@ export interface Education {
   isCurrent: boolean;
   description?: string;
 }
-
-// Adicione mais interfaces conforme necessário

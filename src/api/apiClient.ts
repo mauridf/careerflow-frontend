@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { APP_CONSTANTS } from '../utils/constants';
 
 // Definindo os tipos para as respostas da API
 export interface ApiResponse<T = any> {
@@ -33,8 +34,8 @@ const apiClient: AxiosInstance = axios.create({
 // Interceptor para requisições
 apiClient.interceptors.request.use(
   (config: AxiosRequestConfig) => {
-    // Aqui podemos adicionar o token de autenticação no futuro
-    const token = localStorage.getItem('access_token');
+    // Usando a chave correta da constante
+    const token = localStorage.getItem(APP_CONSTANTS.TOKEN_KEY);
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }

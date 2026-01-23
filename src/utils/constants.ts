@@ -1,40 +1,25 @@
 // Endpoints da API
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    LOGOUT: '/auth/logout',
-    REFRESH_TOKEN: '/auth/refresh-token',
-    CONFIRM_EMAIL: '/auth/confirm-email',
-    FORGOT_PASSWORD: '/auth/forgot-password',
-    RESET_PASSWORD: '/auth/reset-password',
+    LOGIN: '/Auth/login',
+    REGISTER: '/Auth/register',
+    CHECK_EMAIL: '/Auth/check-email',
+    // Adicione outros endpoints conforme necessário
   },
   USERS: {
-    PROFILE: '/users/profile',
-    UPDATE_PROFILE: '/users/profile',
+    PROFILE: '/users/profile', // Ajuste conforme sua API
   },
   PROFESSIONAL_INFO: {
     BASE: '/professional-info',
-    SUMMARY: '/professional-info/summary',
-    SOCIALS: '/professional-info/socials',
-    SKILLS: '/professional-info/skills',
-    EDUCATION: '/professional-info/education',
-    CERTIFICATIONS: '/professional-info/certifications',
-    LANGUAGES: '/professional-info/languages',
-    EXPERIENCES: '/professional-info/experiences',
-  },
-  CV: {
-    GENERATE: '/cv/generate',
-    TEMPLATES: '/cv/templates',
   },
 } as const;
 
 // Constantes de aplicação
 export const APP_CONSTANTS = {
   APP_NAME: 'CareerFlow',
-  TOKEN_KEY: 'access_token',
-  REFRESH_TOKEN_KEY: 'refresh_token',
-  USER_KEY: 'user_data',
+  TOKEN_KEY: 'careerflow_token',
+  USER_KEY: 'careerflow_user',
+  TOKEN_EXPIRY_KEY: 'careerflow_token_expiry',
 } as const;
 
 // Tempos de expiração (em milissegundos)
