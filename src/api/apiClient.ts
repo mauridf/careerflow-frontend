@@ -18,7 +18,7 @@ const getApiBaseUrl = (): string => {
   }
   
   // development ou qualquer outro
-  return import.meta.env.VITE_API_URL_LOCAL || 'http://localhost:7051/api';
+  return import.meta.env.VITE_API_URL_LOCAL || 'https://localhost:7051/api';
 };
 
 // Criando instância do Axios

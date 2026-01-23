@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography, Button, Box, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import logo from '../../assets/images/logo.svg';
+import { useAuth } from '../../hooks/useAuth';
+import logo from '../../assets/images/Logo.png';
 
 const Header = () => {
   const navigate = useNavigate();

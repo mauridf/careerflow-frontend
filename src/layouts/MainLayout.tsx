@@ -1,7 +1,7 @@
 import { Box, Container } from '@mui/material';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import Loading from '../components/common/Loading';
 import { Navigate } from 'react-router-dom';
 
