@@ -32,19 +32,50 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 // Interceptor para requisições
-apiClient.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
-    // Usando a chave correta da constante
-    const token = localStorage.getItem(APP_CONSTANTS.TOKEN_KEY);
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    console.log(`🔵 [API Request] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-    return config;
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    console.log(`🟢 [API Response] ${response.status} ${response.config.url}`);
+    return response;
   },
   (error: AxiosError) => {
-    console.error('🔴 [API Request Error]', error);
+    if (error.response) {
+      console.error('🔴 [API Response Error]', {
+        status: error.response.status,
+        data: error.response.data,
+        url: error.config?.url,
+      });
+      
+      // Tratamento específico para erros 400 (Bad Request)
+      if (error.response.status === 400) {
+        const errorData = error.response.data as any;
+        // Podemos extrair mensagens de validação específicas
+        if (errorData.errors) {
+          console.log('Erros de validação:', errorData.errors);
+        }
+      }
+      
+      switch (error.response.status) {
+        case 401:
+          localStorage.removeItem(APP_CONSTANTS.TOKEN_KEY);
+          localStorage.removeItem(APP_CONSTANTS.USER_KEY);
+          window.location.href = '/login';
+          break;
+        case 403:
+          console.warn('Acesso proibido');
+          break;
+        case 404:
+          console.warn('Recurso não encontrado');
+          break;
+        case 500:
+          console.error('Erro interno do servidor');
+          break;
+      }
+    } else if (error.request) {
+      console.error('🔴 [API No Response] A API pode estar offline ou a URL está incorreta:', error.request);
+    } else {
+      console.error('🔴 [API Request Setup Error]', error.message);
+    }
+    
     return Promise.reject(error);
   }
 );
