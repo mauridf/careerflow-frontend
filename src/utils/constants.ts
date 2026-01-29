@@ -15,6 +15,9 @@ export const API_ENDPOINTS = {
     BASE: '/Skills',
     DISTRIBUTION: '/Skills/distribution',
   },
+  LANGUAGES: {
+    BASE: '/Languages',
+  },
 } as const;
 
 // Constantes de aplicação

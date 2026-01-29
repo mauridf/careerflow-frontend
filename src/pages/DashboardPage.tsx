@@ -364,7 +364,7 @@ const DashboardPage = () => {
                   cursor: 'pointer', 
                   '&:hover': { borderColor: 'primary.main' } 
                 }}
-                onClick={() => navigate('/profile?section=languages')}
+                onClick={() => navigate('/languages')}
               >
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

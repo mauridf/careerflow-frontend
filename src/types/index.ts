@@ -90,12 +90,6 @@ export interface Certification {
   credentialUrl?: string;
 }
 
-export interface Language {
-  id: string;
-  name: string;
-  level: 'Basic' | 'Intermediate' | 'Advanced' | 'Native';
-}
-
 export interface Experience {
   id: string;
   title: string;
@@ -291,6 +285,7 @@ export interface UpcomingExpiration {
   daysUntilExpiration: number;
 }
 
+
 export interface DashboardStats {
   totalSkills: number;
   totalExperiences: number;
@@ -300,3 +295,28 @@ export interface DashboardStats {
   skillDistribution: DashboardSkillDistribution[];
   upcomingExpirations: UpcomingExpiration[];
 }
+
+// Tipos para Languages
+export interface Language {
+  id: string;
+  userId: string;
+  name: string;
+  level: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LanguageRequest {
+  name: string;
+  level: string;
+}
+
+// Enums para Language Level
+export const LanguageLevel = {
+  BASIC: "BASICO",
+  INTERMEDIATE: "INTERMEDIÁRIO",
+  ADVANCED: "AVANÇADO",
+  FLUENT: "FLUENTE/NATIVO"
+} as const;
+
+export type LanguageLevelType = typeof LanguageLevel[keyof typeof LanguageLevel];
