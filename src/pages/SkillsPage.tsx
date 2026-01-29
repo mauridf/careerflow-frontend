@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -35,7 +35,8 @@ import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CodeIcon from '@mui/icons-material/Code';
 import { skillsService } from '../api/skillsService';
-import type { Skill, SkillRequest, SkillLevel, SkillType } from '../types';
+import { SkillLevel, SkillType } from '../types';
+import type { Skill, SkillRequest } from '../types';
 
 const SkillsPage = () => {
   const navigate = useNavigate();
@@ -74,8 +75,8 @@ const SkillsPage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [skillToDelete, setSkillToDelete] = useState<string | null>(null);
 
-  // Carregar skills
-  const loadSkills = async () => {
+  // Função para carregar skills com useCallback para evitar dependência circular
+  const loadSkills = useCallback(async () => {
     if (!user) return;
 
     setIsLoading(true);
@@ -93,11 +94,11 @@ const SkillsPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, filters.type, filters.level]);
 
   useEffect(() => {
     loadSkills();
-  }, [user, filters]);
+  }, [loadSkills]);
 
   // Funções para formulário
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,18 +143,22 @@ const SkillsPage = () => {
   const handleEditClick = (skill: Skill) => {
     setEditingSkill(skill);
     setEditFormData({
-      name: skill.name,
-      type: skill.type,
-      level: skill.level,
+        name: skill.name,
+        type: skill.type,
+        level: skill.level,
     });
     setEditModalOpen(true);
-  };
+    };
 
-  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const name = e.target.name as string;
-    const value = e.target.value as string;
+    const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setEditFormData(prev => ({ ...prev, [name]: value }));
-  };
+    };
+
+    const handleEditSelectChange = (e: SelectChangeEvent<string>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({ ...prev, [name]: value }));
+    };
 
   const handleUpdateSkill = async () => {
     if (!editingSkill || !editFormData.name.trim() || !editFormData.type || !editFormData.level) {
@@ -204,7 +209,7 @@ const SkillsPage = () => {
   };
 
   // Funções auxiliares
-  const getLevelColor = (level: string) => {
+  const getLevelColor = (level: string): 'info' | 'warning' | 'success' | 'default' => {
     switch (level) {
       case SkillLevel.BASIC: return 'info';
       case SkillLevel.INTERMEDIATE: return 'warning';
@@ -444,7 +449,7 @@ const SkillsPage = () => {
                       </Typography>
                       <Chip
                         label={skill.level}
-                        color={getLevelColor(skill.level) as any}
+                        color={getLevelColor(skill.level)}
                         size="small"
                       />
                       {getTypeChip(skill.type)}
@@ -491,7 +496,7 @@ const SkillsPage = () => {
               label="Nome da Habilidade"
               name="name"
               value={editFormData.name}
-              onChange={handleEditFormChange}
+              onChange={handleEditInputChange}
               fullWidth
               required
               disabled={isSaving}
@@ -503,7 +508,7 @@ const SkillsPage = () => {
                 labelId="edit-type-label"
                 name="type"
                 value={editFormData.type}
-                onChange={handleEditFormChange}
+                onChange={handleEditSelectChange}
                 label="Tipo"
               >
                 {Object.values(SkillType).map((type) => (
@@ -520,7 +525,7 @@ const SkillsPage = () => {
                 labelId="edit-level-label"
                 name="level"
                 value={editFormData.level}
-                onChange={handleEditFormChange}
+                onChange={handleEditSelectChange}
                 label="Nível"
               >
                 {Object.values(SkillLevel).map((level) => (

@@ -69,13 +69,6 @@ export interface SocialLink {
   url: string;
 }
 
-export interface Skill {
-  id: string;
-  name: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
-  category?: string;
-}
-
 export interface Education {
   id: string;
   institution: string;
@@ -246,7 +239,7 @@ export interface Skill {
   userId: string;
   name: string;
   type: string;
-  level: string;
+  level: string; // Alterado para string para compatibilidade com a API
   createdAt: string;
   updatedAt: string;
 }
@@ -264,17 +257,46 @@ export interface SkillRequest {
 }
 
 // Enums para Skills (baseado nos enums do backend)
-export enum SkillLevel {
-  BASIC = "BASICO",
-  INTERMEDIATE = "INTERMEDIARIO",
-  ADVANCED = "AVANÇADO"
+// Usando objetos constantes em vez de enum TypeScript
+export const SkillLevel = {
+  BASIC: "BASICO",
+  INTERMEDIATE: "INTERMEDIARIO",
+  ADVANCED: "AVANÇADO"
+} as const;
+
+export type SkillLevelType = typeof SkillLevel[keyof typeof SkillLevel];
+
+export const SkillType = {
+  BACKEND: "BACKEND",
+  FRONTEND: "FRONTEND",
+  DATABASE: "BANCO DE DADOS",
+  CLOUD_DEVOPS: "CLOUD E DEVOPS",
+  ARCHITECTURE: "ARQUITETURA E PADRÕES",
+  TOOLS: "FERRAMENTAS E OUTRAS TECNOLOGIAS"
+} as const;
+
+export type SkillTypeType = typeof SkillType[keyof typeof SkillType];
+
+// Tipos para Dashboard Stats
+export interface DashboardSkillDistribution {
+  type: string;
+  count: number;
+  percentage: number;
 }
 
-export enum SkillType {
-  BACKEND = "BACKEND",
-  FRONTEND = "FRONTEND",
-  DATABASE = "BANCO DE DADOS",
-  CLOUD_DEVOPS = "CLOUD E DEVOPS",
-  ARCHITECTURE = "ARQUITETURA E PADRÕES",
-  TOOLS = "FERRAMENTAS E OUTRAS TECNOLOGIAS"
+export interface UpcomingExpiration {
+  name: string;
+  type: string;
+  expirationDate: string;
+  daysUntilExpiration: number;
+}
+
+export interface DashboardStats {
+  totalSkills: number;
+  totalExperiences: number;
+  totalCertificates: number;
+  totalLanguages: number;
+  profileCompleteness: number;
+  skillDistribution: DashboardSkillDistribution[];
+  upcomingExpirations: UpcomingExpiration[];
 }
