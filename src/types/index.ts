@@ -61,7 +61,7 @@ export interface ProfessionalInfo {
   education?: Education[];
   certifications?: Certificate[];
   languages?: Language[];
-  experiences?: Experience[];
+  experiences?: ProfessionalExperience[];
 }
 
 export interface SocialLink {
@@ -106,16 +106,37 @@ export interface ExpiringCertificate extends Certificate {
   daysUntilExpiration?: number;
 }
 
-export interface Experience {
+// ... (tipos anteriores mantidos)
+
+// Tipos para ProfessionalExperience (Experiências Profissionais)
+export interface ProfessionalExperience {
   id: string;
-  title: string;
+  userId: string;
   company: string;
-  location?: string;
+  position: string;
   startDate: string;
-  endDate?: string;
+  endDate: string | null;
+  responsibilities: string;
+  isPaid: boolean;
   isCurrent: boolean;
-  description?: string;
-  achievements?: string[];
+  skills: Skill[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfessionalExperienceRequest {
+  company: string;
+  position: string;
+  startDate: string;
+  endDate?: string | null;
+  responsibilities: string;
+  isPaid: boolean;
+  skillIds: string[];
+}
+
+// Tipos para SkillExperience (Relacionamento entre Skill e Experience)
+export interface SkillExperienceRequest {
+  skillId: string;
 }
 
 // Tipos para Profile

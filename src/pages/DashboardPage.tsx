@@ -298,7 +298,7 @@ const DashboardPage = () => {
                   cursor: 'pointer', 
                   '&:hover': { borderColor: 'primary.main' } 
                 }}
-                onClick={() => navigate('/profile?section=experiences')}
+                onClick={() => navigate('/experiences')}
               >
                 <CardContent>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

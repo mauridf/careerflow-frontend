@@ -22,6 +22,9 @@ export const API_ENDPOINTS = {
     BASE: '/Certificates',
     EXPIRING: '/Certificates/expiring',
   },
+  EXPERIENCES: {
+    BASE: '/Experiences',
+  },
 } as const;
 
 // Constantes de aplicação

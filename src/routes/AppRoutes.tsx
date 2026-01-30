@@ -7,7 +7,7 @@ import ProfilePage from '../pages/ProfilePage';
 import SkillsPage from '../pages/SkillsPage';
 import LanguagesPage from '../pages/LanguagesPage';;
 import CertificatesPage from '../pages/CertificatesPage';
-// import ResumePage from '../pages/ResumePage';
+import ExperiencesPage from '../pages/ExperiencesPage';
 import NotFoundPage from '../pages/NotFoundPage';
 import MainLayout from '../layouts/MainLayout';
 import AuthLayout from '../layouts/AuthLayout';
@@ -59,11 +59,11 @@ const AppRoutes = () => {
         </MainLayout>
       } />
       
-      {/* <Route path="/resume" element={
+      <Route path="/experiences" element={
         <MainLayout>
-          <ResumePage />
+          <ExperiencesPage />
         </MainLayout>
-      } /> */}
+      } />
       
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
