@@ -59,7 +59,7 @@ export interface ProfessionalInfo {
   socials?: SocialLink[];
   skills?: Skill[];
   education?: Education[];
-  certifications?: Certification[];
+  certifications?: Certificate[];
   languages?: Language[];
   experiences?: Experience[];
 }
@@ -80,14 +80,30 @@ export interface Education {
   description?: string;
 }
 
-export interface Certification {
+// Tipos para Certificates (Certificados)
+export interface Certificate {
   id: string;
+  userId: string;
   name: string;
-  issuingOrganization: string;
-  issueDate: string;
-  expirationDate?: string;
-  credentialId?: string;
-  credentialUrl?: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  isValid: boolean;
+  certificatePath: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CertificateRequest {
+  name: string;
+  description?: string;
+  startDate: string;
+  endDate?: string;
+  certificateFile?: string;
+}
+
+export interface ExpiringCertificate extends Certificate {
+  daysUntilExpiration?: number;
 }
 
 export interface Experience {

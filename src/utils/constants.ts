@@ -18,6 +18,10 @@ export const API_ENDPOINTS = {
   LANGUAGES: {
     BASE: '/Languages',
   },
+  CERTIFICATES: {
+    BASE: '/Certificates',
+    EXPIRING: '/Certificates/expiring',
+  },
 } as const;
 
 // Constantes de aplicação

@@ -5,7 +5,8 @@ import RegisterPage from '../pages/RegisterPage';
 import DashboardPage from '../pages/DashboardPage';
 import ProfilePage from '../pages/ProfilePage';
 import SkillsPage from '../pages/SkillsPage';
-import LanguagesPage from '../pages/LanguagesPage';
+import LanguagesPage from '../pages/LanguagesPage';;
+import CertificatesPage from '../pages/CertificatesPage';
 // import ResumePage from '../pages/ResumePage';
 import NotFoundPage from '../pages/NotFoundPage';
 import MainLayout from '../layouts/MainLayout';
@@ -52,6 +53,12 @@ const AppRoutes = () => {
         </MainLayout>
       } />
 
+      <Route path="/certificates" element={
+        <MainLayout>
+          <CertificatesPage />
+        </MainLayout>
+      } />
+      
       {/* <Route path="/resume" element={
         <MainLayout>
           <ResumePage />
