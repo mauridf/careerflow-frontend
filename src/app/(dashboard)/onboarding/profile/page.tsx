@@ -20,11 +20,9 @@ import {
   FileText,
   Pencil,
   Trash2,
-  Upload,
-  X,
+  User,
   Loader2,
   BadgeCheck,
-  Languages,
 } from 'lucide-react';
 import {
   useProfile,
@@ -139,7 +137,7 @@ export default function ProfilePage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Upload className="h-12 w-12 text-outline" />
+              <User className="h-16 w-16 text-primary/60" />
             )}
           </div>
           <Link
