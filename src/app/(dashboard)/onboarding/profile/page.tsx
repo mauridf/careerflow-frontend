@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Phone,
   MapPin,
@@ -22,6 +23,8 @@ import {
   Upload,
   X,
   Loader2,
+  BadgeCheck,
+  Languages,
 } from 'lucide-react';
 import {
   useProfile,
@@ -34,6 +37,8 @@ import {
   useDeleteSkill,
   useDeleteExperience,
   useDeleteEducation,
+  useDeleteLanguage,
+  useDeleteCertificate,
 } from '@/hooks';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
@@ -45,19 +50,24 @@ import { SkillCategory, ProficiencyLevel, EducationLevel, EducationStatus, Langu
 import { ROUTES } from '@/lib/constants';
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { data: profileData, isLoading: profileLoading, isError: profileError, refetch: refetchProfile } = useProfile();
   const { data: completionData } = useProfileCompletion();
   const { data: skillsData, isLoading: skillsLoading } = useSkills();
   const { data: experiencesData, isLoading: experiencesLoading } = useExperiences();
   const { data: educationData, isLoading: educationLoading } = useEducation();
+  const { data: languagesData, isLoading: languagesLoading } = useLanguages();
+  const { data: certificatesData, isLoading: certificatesLoading } = useCertificates();
 
   const deleteSkill = useDeleteSkill();
   const deleteExperience = useDeleteExperience();
   const deleteEducation = useDeleteEducation();
+  const deleteLanguage = useDeleteLanguage();
+  const deleteCertificate = useDeleteCertificate();
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
-    type: 'skill' | 'experience' | 'education';
+    type: 'skill' | 'experience' | 'education' | 'language' | 'certificate';
     id: string;
     label: string;
   }>({ open: false, type: 'skill', id: '', label: '' });
@@ -67,8 +77,10 @@ export default function ProfilePage() {
   const skills = skillsData?.data || [];
   const experiences = experiencesData?.data || [];
   const education = educationData?.data || [];
+  const languages = languagesData?.data || [];
+  const certificates = certificatesData?.data || [];
 
-  if (profileLoading || skillsLoading || experiencesLoading || educationLoading) {
+  if (profileLoading || skillsLoading || experiencesLoading || educationLoading || languagesLoading || certificatesLoading) {
     return <LoadingState message="Carregando perfil..." size="lg" />;
   }
 
@@ -92,6 +104,12 @@ export default function ProfilePage() {
         break;
       case 'education':
         deleteEducation.mutate(deleteDialog.id);
+        break;
+      case 'language':
+        deleteLanguage.mutate(deleteDialog.id);
+        break;
+      case 'certificate':
+        deleteCertificate.mutate(deleteDialog.id);
         break;
     }
     setDeleteDialog({ open: false, type: 'skill', id: '', label: '' });
@@ -260,7 +278,7 @@ export default function ProfilePage() {
               title="Sem resumo profissional"
               description="Adicione um resumo para destacar sua trajetória."
               actionLabel="Adicionar Resumo"
-              onAction={() => {}}
+              onAction={() => router.push(ROUTES.ONBOARDING_STEP2)}
             />
           )}
         </div>
@@ -337,7 +355,7 @@ export default function ProfilePage() {
               title="Nenhuma habilidade"
               description="Adicione suas habilidades técnicas."
               actionLabel="Adicionar Habilidade"
-              onAction={() => {}}
+              onAction={() => router.push(ROUTES.SKILLS)}
             />
           )}
         </div>
@@ -412,7 +430,157 @@ export default function ProfilePage() {
               title="Nenhuma experiência"
               description="Adicione suas experiências profissionais."
               actionLabel="Adicionar Experiência"
-              onAction={() => {}}
+              onAction={() => router.push(ROUTES.EXPERIENCES)}
+            />
+          )}
+        </div>
+
+        {/* Idiomas */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-level-1">
+          <div className="flex justify-between items-center mb-md">
+            <h3 className="font-display text-headline-sm text-on-surface">
+              Idiomas
+            </h3>
+            <Link
+              href={ROUTES.LANGUAGES}
+              className="text-secondary hover:text-primary transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </Link>
+          </div>
+          {languages.length > 0 ? (
+            <div className="space-y-3">
+              {languages.slice(0, 5).map((lang) => (
+                <div
+                  key={lang.id}
+                  className="p-3 bg-surface border border-outline-variant rounded-xl flex items-center justify-between group"
+                >
+                  <div>
+                    <p className="font-medium font-sans text-label-md text-on-surface">
+                      {lang.languageName}
+                    </p>
+                    <p className="text-[10px] text-secondary font-bold uppercase tracking-wider">
+                      {LanguageLevel[lang.proficiencyScore === 10 ? 0 : lang.proficiencyScore === 25 ? 1 : lang.proficiencyScore === 45 ? 2 : lang.proficiencyScore === 65 ? 3 : lang.proficiencyScore === 85 ? 4 : lang.proficiencyScore === 95 ? 5 : 6]?.label || lang.proficiencyLevel}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {lang.isNative && (
+                      <span className="text-[10px] text-primary font-bold uppercase tracking-wider bg-primary/10 px-2 py-0.5 rounded-full">
+                        Nativo
+                      </span>
+                    )}
+                    <button
+                      onClick={() =>
+                        setDeleteDialog({
+                          open: true,
+                          type: 'language',
+                          id: lang.id,
+                          label: lang.languageName,
+                        })
+                      }
+                      className="opacity-0 group-hover:opacity-100 text-secondary hover:text-error transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {languages.length > 5 && (
+                <Link
+                  href={ROUTES.LANGUAGES}
+                  className="text-primary font-display text-label-sm hover:underline block text-center mt-2"
+                >
+                  Ver todas ({languages.length})
+                </Link>
+              )}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Globe}
+              title="Nenhum idioma"
+              description="Adicione os idiomas que você fala."
+              actionLabel="Adicionar Idioma"
+              onAction={() => router.push(ROUTES.LANGUAGES)}
+            />
+          )}
+        </div>
+
+        {/* Certificações */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-level-1">
+          <div className="flex justify-between items-center mb-md">
+            <h3 className="font-display text-headline-sm text-on-surface">
+              Certificações
+            </h3>
+            <Link
+              href={ROUTES.CERTIFICATES}
+              className="text-secondary hover:text-primary transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </Link>
+          </div>
+          {certificates.length > 0 ? (
+            <div className="space-y-3">
+              {certificates.slice(0, 5).map((cert) => (
+                <div
+                  key={cert.id}
+                  className="p-3 bg-surface border border-outline-variant rounded-xl flex items-center justify-between group"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium font-sans text-label-md text-on-surface truncate">
+                      {cert.title}
+                    </p>
+                    <p className="text-[12px] text-secondary font-sans">
+                      {cert.issuer}
+                    </p>
+                    <p className="text-[10px] text-secondary font-sans">
+                      {formatDate(cert.issueDate, 'MM/yyyy')}
+                      {cert.expirationDate && ` — ${formatDate(cert.expirationDate, 'MM/yyyy')}`}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 ml-2">
+                    {cert.credentialUrl && (
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-secondary hover:text-primary transition-colors"
+                        title="Ver credencial"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    )}
+                    <button
+                      onClick={() =>
+                        setDeleteDialog({
+                          open: true,
+                          type: 'certificate',
+                          id: cert.id,
+                          label: cert.title,
+                        })
+                      }
+                      className="opacity-0 group-hover:opacity-100 text-secondary hover:text-error transition-all"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {certificates.length > 5 && (
+                <Link
+                  href={ROUTES.CERTIFICATES}
+                  className="text-primary font-display text-label-sm hover:underline block text-center mt-2"
+                >
+                  Ver todas ({certificates.length})
+                </Link>
+              )}
+            </div>
+          ) : (
+            <EmptyState
+              icon={BadgeCheck}
+              title="Nenhuma certificação"
+              description="Adicione suas certificações."
+              actionLabel="Adicionar Certificação"
+              onAction={() => router.push(ROUTES.CERTIFICATES)}
             />
           )}
         </div>
@@ -484,7 +652,7 @@ export default function ProfilePage() {
               title="Nenhuma formação"
               description="Adicione sua formação acadêmica."
               actionLabel="Adicionar Formação"
-              onAction={() => {}}
+              onAction={() => router.push(ROUTES.EDUCATION)}
             />
           )}
         </div>
@@ -494,13 +662,13 @@ export default function ProfilePage() {
       <ConfirmDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open }))}
-        title={`Remover ${deleteDialog.type === 'skill' ? 'habilidade' : deleteDialog.type === 'experience' ? 'experiência' : 'formação'}`}
+        title={`Remover ${deleteDialog.type === 'skill' ? 'habilidade' : deleteDialog.type === 'experience' ? 'experiência' : deleteDialog.type === 'education' ? 'formação' : deleteDialog.type === 'language' ? 'idioma' : 'certificação'}`}
         description={`Tem certeza que deseja remover "${deleteDialog.label}"? Esta ação não pode ser desfeita.`}
         confirmLabel="Remover"
         variant="destructive"
         onConfirm={handleDelete}
         loading={
-          deleteSkill.isPending || deleteExperience.isPending || deleteEducation.isPending
+          deleteSkill.isPending || deleteExperience.isPending || deleteEducation.isPending || deleteLanguage.isPending || deleteCertificate.isPending
         }
       />
     </div>

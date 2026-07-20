@@ -82,6 +82,7 @@ export default function ExperiencesPage() {
     label: string;
   }>({ open: false, id: '', label: '' });
   const [skillSearch, setSkillSearch] = useState('');
+  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [descCharCount, setDescCharCount] = useState(0);
 
   const experiences = experiencesData?.data || [];
@@ -89,7 +90,7 @@ export default function ExperiencesPage() {
 
   const filteredSkills = allSkills.filter(
     (s) =>
-      s.name.toLowerCase().includes(skillSearch.toLowerCase()) &&
+      (!skillSearch || s.name.toLowerCase().includes(skillSearch.toLowerCase())) &&
       !formData.skillsUsed.includes(s.id)
   );
 
@@ -97,6 +98,7 @@ export default function ExperiencesPage() {
     setFormData(initialFormData);
     setEditingId(null);
     setSkillSearch('');
+    setShowSkillDropdown(false);
     setDescCharCount(0);
   };
 
@@ -165,6 +167,7 @@ export default function ExperiencesPage() {
       skillsUsed: [...prev.skillsUsed, skillId],
     }));
     setSkillSearch('');
+    setShowSkillDropdown(false);
   };
 
   const removeSkill = (skillId: string) => {
@@ -534,12 +537,17 @@ export default function ExperiencesPage() {
                     <input
                       type="text"
                       value={skillSearch}
-                      onChange={(e) => setSkillSearch(e.target.value)}
+                      onChange={(e) => {
+                        setSkillSearch(e.target.value);
+                        setShowSkillDropdown(true);
+                      }}
+                      onFocus={() => setShowSkillDropdown(true)}
+                      onBlur={() => setTimeout(() => setShowSkillDropdown(false), 200)}
                       placeholder="Buscar habilidades (Ex: React, Gestão Ágil, SQL...)"
                       className="w-full h-11 pl-xl pr-md rounded-lg border border-outline-variant bg-white text-body-md focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-sans"
                     />
                     {/* Dropdown de sugestões */}
-                    {skillSearch && filteredSkills.length > 0 && (
+                    {showSkillDropdown && filteredSkills.length > 0 && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-outline-variant rounded-lg shadow-level-2 max-h-40 overflow-y-auto z-10">
                         {filteredSkills.slice(0, 8).map((skill) => (
                           <button
@@ -575,7 +583,10 @@ export default function ExperiencesPage() {
                     })}
                     <button
                       type="button"
-                      onClick={() => setSkillSearch(' ')}
+                      onClick={() => {
+                        setSkillSearch('');
+                        setShowSkillDropdown(true);
+                      }}
                       className="flex items-center gap-xs px-sm py-1.5 bg-white text-on-surface-variant hover:text-primary rounded-full font-display text-label-md border border-dashed border-outline-variant hover:border-primary transition-all"
                     >
                       <Plus className="h-4 w-4" />

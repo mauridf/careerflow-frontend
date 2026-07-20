@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export interface Toast {
   id: string;
@@ -26,21 +26,34 @@ function dispatch(toast: Omit<Toast, 'id'>) {
   return id;
 }
 
+function dismiss(id: string) {
+  memoryState = {
+    ...memoryState,
+    toasts: memoryState.toasts.filter((t) => t.id !== id),
+  };
+  listeners.forEach((listener) => listener(memoryState));
+}
+
+const AUTO_DISMISS_MS = 5000;
+
 export function useToast() {
   const [state, setState] = useState<ToastState>(memoryState);
 
-  useState(() => {
+  useEffect(() => {
     listeners.push(setState);
     return () => {
       const index = listeners.indexOf(setState);
       if (index > -1) listeners.splice(index, 1);
     };
-  });
+  }, []);
 
   const toast = useCallback(
-    (props: Omit<Toast, 'id'>) => dispatch(props),
+    (props: Omit<Toast, 'id'>) => {
+      const id = dispatch(props);
+      setTimeout(() => dismiss(id), AUTO_DISMISS_MS);
+    },
     []
   );
 
-  return { ...state, toast };
+  return { ...state, toast, dismiss };
 }
