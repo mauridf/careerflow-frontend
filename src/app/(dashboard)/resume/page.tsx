@@ -30,6 +30,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { formatDate, formatPhone } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import { ROUTES } from '@/lib/constants';
+import type { ResumeResponse, PersonInfo } from '@/types';
 
 const TEMPLATES = [
   { id: 'modern', label: 'Moderno', premium: false },
@@ -39,6 +40,405 @@ const TEMPLATES = [
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]['id'];
+
+function renderModernTemplate(resume: ResumeResponse, person: PersonInfo) {
+  return (
+    <div className="w-full max-w-[210mm] bg-white shadow-lg border border-slate-200">
+      <div className="p-[40px]">
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-extrabold text-slate-900 mb-1">{person.name}</h1>
+          {person.currentPosition && (
+            <p className="text-lg text-primary font-semibold uppercase tracking-widest mb-2">
+              {person.currentPosition}{person.currentCompany && ` - ${person.currentCompany}`}
+            </p>
+          )}
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-slate-600">
+            {person.email && <span>{person.email}</span>}
+            {person.phone && <span>{formatPhone(person.phone)}</span>}
+            {person.city && <span>{person.city}{person.state ? `/${person.state}` : ''}</span>}
+          </div>
+        </div>
+        <div className="h-[2px] bg-primary mb-6" />
+        {renderSummary(person)}
+        {renderExperiences(resume)}
+        {renderEducations(resume)}
+        <div className="grid grid-cols-2 gap-6">
+          {renderSkills(resume)}
+          <div className="space-y-6">
+            {renderLanguages(resume)}
+            {renderCertificates(resume)}
+          </div>
+        </div>
+        {renderSocialNetworks(resume)}
+      </div>
+    </div>
+  );
+}
+
+function renderClassicTemplate(resume: ResumeResponse, person: PersonInfo) {
+  return (
+    <div className="w-full max-w-[210mm] bg-white shadow-lg border border-slate-200">
+      <div className="flex min-h-[297mm]">
+        <div className="w-[35%] bg-slate-800 p-[30px] text-white">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold mb-1">{person.name}</h1>
+            {person.currentPosition && (
+              <p className="text-amber-400 text-sm font-medium uppercase tracking-wider">{person.currentPosition}</p>
+            )}
+          </div>
+          <div className="space-y-3 text-sm text-slate-300 mb-6">
+            {person.email && <p>{person.email}</p>}
+            {person.phone && <p>{formatPhone(person.phone)}</p>}
+            {person.city && <p>{person.city}{person.state ? `/${person.state}` : ''}</p>}
+          </div>
+          <div className="border-t border-slate-600 pt-4 mb-6">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">Habilidades</h2>
+            {resume.skills.map((skill, idx) => (
+              <div key={idx} className="mb-2">
+                <div className="flex justify-between text-sm text-slate-200 mb-1">
+                  <span>{skill.name}</span>
+                  <span className="text-xs text-slate-400">{skill.level}</span>
+                </div>
+                <div className="h-1.5 bg-slate-600 rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-400 rounded-full" style={{ width: `${skill.score}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+          {resume.languages.length > 0 && (
+            <div className="border-t border-slate-600 pt-4 mb-6">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">Idiomas</h2>
+              <div className="space-y-1">
+                {resume.languages.map((lang, idx) => (
+                  <div key={idx} className="flex justify-between text-sm text-slate-200">
+                    <span>{lang.languageName}</span>
+                    <span className="text-xs text-slate-400">{lang.level}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="w-[65%] p-[30px]">
+          {renderSummary(person)}
+          {renderExperiences(resume)}
+          {renderEducations(resume)}
+          {renderCertificates(resume)}
+          {renderSocialNetworks(resume)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderMinimalTemplate(resume: ResumeResponse, person: PersonInfo) {
+  return (
+    <div className="w-full max-w-[210mm] bg-white shadow-sm border border-slate-100">
+      <div className="p-[48px]">
+        <div className="mb-8">
+          <h1 className="text-3xl font-light text-slate-900 mb-2">{person.name}</h1>
+          {person.currentPosition && (
+            <p className="text-sm text-slate-400 font-light">{person.currentPosition}{person.currentCompany && ` — ${person.currentCompany}`}</p>
+          )}
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-slate-400 mt-3">
+            {person.email && <span>{person.email}</span>}
+            {person.phone && <span>{formatPhone(person.phone)}</span>}
+            {person.city && <span>{person.city}{person.state ? `/${person.state}` : ''}</span>}
+          </div>
+        </div>
+        <div className="w-12 h-[1px] bg-slate-300 mb-8" />
+        {person.professionalSummary && (
+          <div className="mb-8">
+            <p className="text-sm text-slate-600 leading-relaxed">{person.professionalSummary}</p>
+          </div>
+        )}
+        {resume.experiences.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xs text-slate-400 uppercase tracking-[0.2em] mb-4">Experiência</h2>
+            <div className="space-y-5">
+              {resume.experiences.map((exp, idx) => (
+                <div key={idx}>
+                  <div className="flex items-baseline justify-between gap-2 mb-1">
+                    <div>
+                      <span className="text-sm font-medium text-slate-900">{exp.position}</span>
+                      <span className="text-sm text-slate-500"> · {exp.companyName}</span>
+                    </div>
+                    <span className="text-xs text-slate-400 whitespace-nowrap">
+                      {formatDate(exp.startDate, 'MMM/yyyy')} – {exp.isCurrent ? 'presente' : formatDate(exp.endDate!, 'MMM/yyyy')}
+                    </span>
+                  </div>
+                  {exp.description && <p className="text-xs text-slate-500 leading-relaxed mt-1">{exp.description}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {resume.educations.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xs text-slate-400 uppercase tracking-[0.2em] mb-4">Formação</h2>
+            <div className="space-y-3">
+              {resume.educations.map((edu, idx) => (
+                <div key={idx}>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <div>
+                      <span className="text-sm font-medium text-slate-900">{edu.course}</span>
+                      <span className="text-sm text-slate-500"> · {edu.institution}</span>
+                    </div>
+                    <span className="text-xs text-slate-400 whitespace-nowrap">
+                      {formatDate(edu.startDate, 'yyyy')} – {edu.endDate ? formatDate(edu.endDate, 'yyyy') : 'presente'}
+                    </span>
+                  </div>
+                  <div className="flex gap-3 mt-1">
+                    <span className="text-xs text-slate-400">{edu.level}</span>
+                    <span className="text-xs text-slate-400">{edu.status}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex gap-8">
+          {resume.skills.length > 0 && (
+            <div className="flex-1">
+              <h2 className="text-xs text-slate-400 uppercase tracking-[0.2em] mb-3">Habilidades</h2>
+              <div className="flex flex-wrap gap-2">
+                {resume.skills.map((skill, idx) => (
+                  <span key={idx} className="text-xs text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">
+                    {skill.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {resume.languages.length > 0 && (
+            <div className="flex-1">
+              <h2 className="text-xs text-slate-400 uppercase tracking-[0.2em] mb-3">Idiomas</h2>
+              <div className="space-y-1">
+                {resume.languages.map((lang, idx) => (
+                  <div key={idx} className="text-xs text-slate-600">
+                    {lang.languageName}{lang.isNative && ' (nativo)'} · {lang.level}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        {resume.certificates.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-xs text-slate-400 uppercase tracking-[0.2em] mb-3">Certificações</h2>
+            <div className="space-y-1">
+              {resume.certificates.slice(0, 4).map((cert, idx) => (
+                <p key={idx} className="text-xs text-slate-500">{cert.title} — {cert.issuer}, {formatDate(cert.issueDate, 'yyyy')}</p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function renderATSTemplate(resume: ResumeResponse, person: PersonInfo) {
+  return (
+    <div className="w-full max-w-[210mm] bg-white border border-slate-200">
+      <div className="p-[36px]">
+        <div className="mb-5">
+          <h1 className="text-2xl font-bold text-slate-900">{person.name}</h1>
+          {person.currentPosition && (
+            <p className="text-sm text-slate-700 mt-1">{person.currentPosition}{person.currentCompany && ` at ${person.currentCompany}`}</p>
+          )}
+          <div className="text-xs text-slate-600 mt-1">
+            {[person.email, person.phone && formatPhone(person.phone), person.city && `${person.city}${person.state ? `/${person.state}` : ''}`].filter(Boolean).join(' | ')}
+          </div>
+        </div>
+        {person.professionalSummary && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-1">Professional Summary</h2>
+            <p className="text-xs text-slate-700 leading-relaxed">{person.professionalSummary}</p>
+          </div>
+        )}
+        {resume.experiences.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-2 border-b border-slate-200 pb-1">Experience</h2>
+            <div className="space-y-3">
+              {resume.experiences.map((exp, idx) => (
+                <div key={idx}>
+                  <p className="text-xs font-bold text-slate-900">{exp.position}</p>
+                  <p className="text-xs text-slate-700">{exp.companyName} | {formatDate(exp.startDate, 'MMM/yyyy')} – {exp.isCurrent ? 'Present' : formatDate(exp.endDate!, 'MMM/yyyy')}{exp.durationFormatted && ` (${exp.durationFormatted})`}</p>
+                  {exp.description && <p className="text-xs text-slate-600 mt-0.5">{exp.description}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {resume.educations.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-2 border-b border-slate-200 pb-1">Education</h2>
+            <div className="space-y-2">
+              {resume.educations.map((edu, idx) => (
+                <div key={idx}>
+                  <p className="text-xs font-bold text-slate-900">{edu.course}</p>
+                  <p className="text-xs text-slate-700">{edu.institution} | {edu.level} – {formatDate(edu.startDate, 'yyyy')} to {edu.endDate ? formatDate(edu.endDate, 'yyyy') : 'Present'}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {resume.skills.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-1 border-b border-slate-200 pb-1">Skills</h2>
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-slate-700">
+              {resume.skills.map((s, i) => (
+                <span key={i}>{s.name}{i < resume.skills.length - 1 ? ',' : ''}</span>
+              ))}
+            </div>
+          </div>
+        )}
+        {resume.languages.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-1 border-b border-slate-200 pb-1">Languages</h2>
+            <div className="text-xs text-slate-700">
+              {resume.languages.map((l, i) => `${l.languageName} (${l.level})`).join(', ')}
+            </div>
+          </div>
+        )}
+        {resume.certificates.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-1 border-b border-slate-200 pb-1">Certifications</h2>
+            <div className="text-xs text-slate-700">
+              {resume.certificates.slice(0, 5).map((c, i) => `${c.title}, ${c.issuer} (${formatDate(c.issueDate, 'yyyy')})`).join('; ')}
+            </div>
+          </div>
+        )}
+        {resume.socialNetworks.length > 0 && (
+          <div className="mb-4">
+            <h2 className="text-xs font-bold text-slate-900 uppercase mb-1 border-b border-slate-200 pb-1">Links</h2>
+            <div className="text-xs text-slate-700">{resume.socialNetworks.map(s => s.url).join(' | ')}</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function renderSummary(person: PersonInfo) { return person.professionalSummary ? (
+  <div className="mb-6">
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">Resumo Profissional</h2>
+    <p className="text-sm text-slate-700 leading-relaxed">{person.professionalSummary}</p>
+  </div>
+) : null; }
+
+function renderExperiences(resume: ResumeResponse) { return resume.experiences.length > 0 ? (
+  <div className="mb-6">
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Experiência Profissional</h2>
+    <div className="space-y-4">
+      {resume.experiences.map((exp, idx) => (
+        <div key={idx}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">{exp.position}</h3>
+              <p className="text-sm text-slate-700">{exp.companyName}</p>
+            </div>
+            <span className="text-xs text-slate-500 whitespace-nowrap">
+              {formatDate(exp.startDate, 'MMM/yyyy')} - {exp.isCurrent ? 'Atual' : formatDate(exp.endDate!, 'MMM/yyyy')}
+              {exp.durationFormatted && ` (${exp.durationFormatted})`}
+            </span>
+          </div>
+          {exp.description && <p className="text-sm text-slate-600 mt-1 leading-relaxed">{exp.description}</p>}
+          {exp.employmentType && <span className="text-xs text-slate-400 mt-1 block">{exp.employmentType}</span>}
+        </div>
+      ))}
+    </div>
+  </div>
+) : null; }
+
+function renderEducations(resume: ResumeResponse) { return resume.educations.length > 0 ? (
+  <div className="mb-6">
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Formação Acadêmica</h2>
+    <div className="space-y-3">
+      {resume.educations.map((edu, idx) => (
+        <div key={idx}>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">{edu.course}</h3>
+              <p className="text-sm text-slate-700">{edu.institution}</p>
+            </div>
+            <span className="text-xs text-slate-500 whitespace-nowrap">{formatDate(edu.startDate, 'yyyy')} - {edu.endDate ? formatDate(edu.endDate, 'yyyy') : 'Atual'}</span>
+          </div>
+          <div className="flex gap-3 mt-1">
+            <span className="text-xs text-slate-500">{edu.level}</span>
+            <span className="text-xs text-slate-500">{edu.status}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+) : null; }
+
+function renderSkills(resume: ResumeResponse) { return resume.skills.length > 0 ? (
+  <div>
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Habilidades</h2>
+    <div className="space-y-2">
+      {resume.skills.map((skill, idx) => (
+        <div key={idx}>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-slate-700 font-medium">
+              {skill.name}
+              {skill.isPrimary && <span className="text-primary ml-1">*</span>}
+            </span>
+            <span className="text-xs text-slate-500">{skill.level}</span>
+          </div>
+          <div className="mt-1 h-[6px] bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${skill.score}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+) : null; }
+
+function renderLanguages(resume: ResumeResponse) { return resume.languages.length > 0 ? (
+  <div>
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Idiomas</h2>
+    <div className="space-y-1">
+      {resume.languages.map((lang, idx) => (
+        <div key={idx} className="flex items-center justify-between">
+          <span className="text-sm text-slate-700">
+            {lang.languageName}
+            {lang.isNative && <span className="text-xs text-slate-400 ml-1">(Nativo)</span>}
+          </span>
+          <span className="text-xs text-slate-500">{lang.level}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+) : null; }
+
+function renderCertificates(resume: ResumeResponse) { return resume.certificates.length > 0 ? (
+  <div>
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Certificações</h2>
+    <div className="space-y-2">
+      {resume.certificates.slice(0, 5).map((cert, idx) => (
+        <div key={idx}>
+          <p className="text-sm text-slate-700 font-medium">{cert.title}</p>
+          <p className="text-xs text-slate-500">{cert.issuer} - {formatDate(cert.issueDate, 'yyyy')}</p>
+        </div>
+      ))}
+      {resume.certificates.length > 5 && <p className="text-xs text-primary font-medium">+{resume.certificates.length - 5} certificações</p>}
+    </div>
+  </div>
+) : null; }
+
+function renderSocialNetworks(resume: ResumeResponse) { return resume.socialNetworks.length > 0 ? (
+  <div className="mt-6 pt-4 border-t border-slate-200">
+    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">Redes Sociais</h2>
+    <div className="flex flex-wrap gap-x-4 gap-y-1">
+      {resume.socialNetworks.map((sn, idx) => (
+        <a key={idx} href={sn.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">{sn.networkType}</a>
+      ))}
+    </div>
+  </div>
+) : null; }
 
 export default function ResumePage() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('modern');
@@ -248,9 +648,9 @@ export default function ResumePage() {
           <div className="bg-white border border-outline-variant rounded-xl p-lg">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-display text-label-md font-semibold text-slate-900">Templates</h3>
-              <span className="text-label-sm text-primary font-display cursor-pointer hover:underline">
+              <Link href={ROUTES.ONBOARDING + '?upgrade=true'} className="text-label-sm text-primary font-display cursor-pointer hover:underline">
                 +3 templates
-              </span>
+              </Link>
             </div>
             <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
               {TEMPLATES.map((template) => (
@@ -264,8 +664,20 @@ export default function ResumePage() {
                       : 'border-outline-variant hover:border-primary/50'
                   )}
                 >
-                  <div className="aspect-[3/4] rounded-lg bg-surface-container-low flex items-center justify-center mb-2">
-                    <FileText className="h-8 w-8 text-slate-400" />
+                  <div className={cn(
+                    'aspect-[3/4] rounded-lg flex items-center justify-center mb-2',
+                    template.id === 'modern' ? 'bg-gradient-to-br from-indigo-50 to-white' :
+                    template.id === 'classic' ? 'bg-gradient-to-br from-amber-50 to-white' :
+                    template.id === 'minimal' ? 'bg-gradient-to-br from-slate-50 to-white' :
+                    'bg-gradient-to-br from-emerald-50 to-white'
+                  )}>
+                    <FileText className={cn(
+                      'h-8 w-8',
+                      template.id === 'modern' ? 'text-indigo-400' :
+                      template.id === 'classic' ? 'text-amber-500' :
+                      template.id === 'minimal' ? 'text-slate-400' :
+                      'text-emerald-500'
+                    )} />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-display text-label-sm text-slate-900">{template.label}</span>
@@ -296,211 +708,10 @@ export default function ResumePage() {
               className="flex justify-center transition-all duration-300"
               style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center' }}
             >
-              <div className="w-full max-w-[210mm] bg-white shadow-lg border border-slate-200">
-                {/* A4 Resume Document */}
-                <div className="p-[40px]">
-                  {/* Header */}
-                  <div className="text-center mb-6">
-                    <h1 className="text-4xl font-extrabold text-slate-900 mb-1">
-                      {person.name}
-                    </h1>
-                    {person.currentPosition && (
-                      <p className="text-lg text-primary font-semibold uppercase tracking-widest mb-2">
-                        {person.currentPosition}
-                        {person.currentCompany && ` - ${person.currentCompany}`}
-                      </p>
-                    )}
-                    <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-slate-600">
-                      {person.email && <span>{person.email}</span>}
-                      {person.phone && <span>{formatPhone(person.phone)}</span>}
-                      {person.city && (
-                        <span>{person.city}{person.state ? `/${person.state}` : ''}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="h-[2px] bg-primary mb-6" />
-
-                  {/* Professional Summary */}
-                  {person.professionalSummary && (
-                    <div className="mb-6">
-                      <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">
-                        Resumo Profissional
-                      </h2>
-                      <p className="text-sm text-slate-700 leading-relaxed">
-                        {person.professionalSummary}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Professional Experience */}
-                  {resume.experiences.length > 0 && (
-                    <div className="mb-6">
-                      <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                        Experiência Profissional
-                      </h2>
-                      <div className="space-y-4">
-                        {resume.experiences.map((exp, idx) => (
-                          <div key={idx}>
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <h3 className="text-sm font-bold text-slate-900">
-                                  {exp.position}
-                                </h3>
-                                <p className="text-sm text-slate-700">{exp.companyName}</p>
-                              </div>
-                              <span className="text-xs text-slate-500 whitespace-nowrap">
-                                {formatDate(exp.startDate, 'MMM/yyyy')} - {exp.isCurrent ? 'Atual' : formatDate(exp.endDate!, 'MMM/yyyy')}
-                                {exp.durationFormatted && ` (${exp.durationFormatted})`}
-                              </span>
-                            </div>
-                            {exp.description && (
-                              <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                                {exp.description}
-                              </p>
-                            )}
-                            {exp.employmentType && (
-                              <span className="text-xs text-slate-400 mt-1 block">
-                                {exp.employmentType}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Education */}
-                  {resume.educations.length > 0 && (
-                    <div className="mb-6">
-                      <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                        Formação Acadêmica
-                      </h2>
-                      <div className="space-y-3">
-                        {resume.educations.map((edu, idx) => (
-                          <div key={idx}>
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <h3 className="text-sm font-bold text-slate-900">{edu.course}</h3>
-                                <p className="text-sm text-slate-700">{edu.institution}</p>
-                              </div>
-                              <span className="text-xs text-slate-500 whitespace-nowrap">
-                                {formatDate(edu.startDate, 'yyyy')} - {edu.endDate ? formatDate(edu.endDate, 'yyyy') : 'Atual'}
-                              </span>
-                            </div>
-                            <div className="flex gap-3 mt-1">
-                              <span className="text-xs text-slate-500">{edu.level}</span>
-                              <span className="text-xs text-slate-500">{edu.status}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Skills + Languages + Certificates - Two Columns */}
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Skills */}
-                    {resume.skills.length > 0 && (
-                      <div>
-                        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                          Habilidades
-                        </h2>
-                        <div className="space-y-2">
-                          {resume.skills.map((skill, idx) => (
-                            <div key={idx}>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-slate-700 font-medium">
-                                  {skill.name}
-                                  {skill.isPrimary && (
-                                    <span className="text-primary ml-1">*</span>
-                                  )}
-                                </span>
-                                <span className="text-xs text-slate-500">{skill.level}</span>
-                              </div>
-                              <div className="mt-1 h-[6px] bg-slate-100 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-primary rounded-full transition-all"
-                                  style={{ width: `${skill.score}%` }}
-                                />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Languages & Certificates */}
-                    <div className="space-y-6">
-                      {resume.languages.length > 0 && (
-                        <div>
-                          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                            Idiomas
-                          </h2>
-                          <div className="space-y-1">
-                            {resume.languages.map((lang, idx) => (
-                              <div key={idx} className="flex items-center justify-between">
-                                <span className="text-sm text-slate-700">
-                                  {lang.languageName}
-                                  {lang.isNative && (
-                                    <span className="text-xs text-slate-400 ml-1">(Nativo)</span>
-                                  )}
-                                </span>
-                                <span className="text-xs text-slate-500">{lang.level}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {resume.certificates.length > 0 && (
-                        <div>
-                          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
-                            Certificações
-                          </h2>
-                          <div className="space-y-2">
-                            {resume.certificates.slice(0, 5).map((cert, idx) => (
-                              <div key={idx}>
-                                <p className="text-sm text-slate-700 font-medium">{cert.title}</p>
-                                <p className="text-xs text-slate-500">
-                                  {cert.issuer} - {formatDate(cert.issueDate, 'yyyy')}
-                                </p>
-                              </div>
-                            ))}
-                            {resume.certificates.length > 5 && (
-                              <p className="text-xs text-primary font-medium">
-                                +{resume.certificates.length - 5} certificações
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Social Networks */}
-                  {resume.socialNetworks.length > 0 && (
-                    <div className="mt-6 pt-4 border-t border-slate-200">
-                      <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">
-                        Redes Sociais
-                      </h2>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        {resume.socialNetworks.map((sn, idx) => (
-                          <a
-                            key={idx}
-                            href={sn.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary hover:underline"
-                          >
-                            {sn.networkType}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              {selectedTemplate === 'modern' && renderModernTemplate(resume, person)}
+              {selectedTemplate === 'classic' && renderClassicTemplate(resume, person)}
+              {selectedTemplate === 'minimal' && renderMinimalTemplate(resume, person)}
+              {selectedTemplate === 'ats' && renderATSTemplate(resume, person)}
             </div>
           )}
         </div>
