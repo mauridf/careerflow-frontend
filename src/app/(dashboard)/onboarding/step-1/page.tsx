@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -90,7 +91,7 @@ export default function OnboardingStep1Page() {
       return;
     }
 
-    if (!LIMITS.PHOTO_ACCEPTED_TYPES.includes(file.type)) {
+    if (!LIMITS.PHOTO_ACCEPTED_TYPES.some((t) => t === file.type)) {
       alert('Formato inválido. Use JPG, PNG ou WebP.');
       return;
     }
