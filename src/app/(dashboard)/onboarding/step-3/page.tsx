@@ -70,7 +70,8 @@ export default function OnboardingStep3Page() {
     try {
       const payload = {
         ...data,
-        endDate: isCurrentJob ? null : data.endDate || null,
+        startDate: `${data.startDate}-01`,
+        endDate: isCurrentJob ? null : data.endDate ? `${data.endDate}-01` : null,
         skillsUsed: selectedSkills,
       };
       await createExperience.mutateAsync(payload);
