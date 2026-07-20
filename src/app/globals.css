@@ -274,4 +274,27 @@
     background-color: #cbd5e1;
     border-radius: 3px;
   }
+
+  /* Mesh Background */
+  .mesh-bg {
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(79, 70, 229, 0.05) 0px, transparent 50%);
+  }
+
+  /* Slide Down Animation para Error Banner */
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
