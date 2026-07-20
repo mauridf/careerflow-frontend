@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Mail, CheckCircle2, Shield, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Shield, Lock, Loader2 } from 'lucide-react';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/lib/validators';
 import { useForgotPassword } from '@/hooks';
 import { ROUTES } from '@/lib/constants';
@@ -119,7 +119,7 @@ export default function ForgotPasswordPage() {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-lg">
                   {/* Email Field */}
-                  <div className="space-y-base">
+                    <div className="space-y-base">
                     <label
                       htmlFor="email"
                       className="font-display text-label-md text-on-surface-variant block"
@@ -127,13 +127,12 @@ export default function ForgotPasswordPage() {
                       Email Profissional
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                       <input
                         id="email"
                         type="email"
                         placeholder="exemplo@careerflow.com"
                         {...register('email')}
-                        className={`w-full h-12 pl-10 pr-4 bg-white border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-sans text-body-md ${
+                        className={`w-full h-12 px-md bg-white border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none font-sans text-body-md ${
                           errors.email ? 'border-error' : 'border-outline-variant'
                         }`}
                       />
