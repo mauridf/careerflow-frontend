@@ -48,6 +48,9 @@ function clearStoredTokens(): void {
   localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN);
   localStorage.removeItem(TOKEN_KEYS.USER);
   localStorage.removeItem(TOKEN_KEYS.ROLE);
+  localStorage.removeItem('careerflow-auth');
+  document.cookie = 'accessToken=; path=/; max-age=0';
+  document.cookie = 'userRole=; path=/; max-age=0';
 }
 
 // Request interceptor - Adiciona token JWT em todas as requisições
@@ -73,6 +76,22 @@ api.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
     };
+
+    // Se não há resposta (rede indisponível, servidor offline)
+    if (!error.response && !originalRequest._retry) {
+      const isAuthRoute = originalRequest.url?.includes('/auth/');
+      if (!isAuthRoute) {
+        const { accessToken } = getStoredTokens();
+        if (accessToken) {
+          originalRequest._retry = true;
+          clearStoredTokens();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+        }
+      }
+      return Promise.reject(error);
+    }
 
     // Se for erro 401 e não for tentativa de refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -122,6 +141,7 @@ api.interceptors.response.use(
           response.data.data;
 
         setStoredTokens(newAccessToken, newRefreshToken);
+        document.cookie = `accessToken=${newAccessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
 
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

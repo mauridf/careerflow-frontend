@@ -7,18 +7,18 @@ import {
   ArrowLeft,
   Edit3,
   History,
-  AccountCircle,
+  UserCircle,
   Badge,
-  Analytics,
+  BarChart3,
   Bolt,
   Verified,
-  LockReset,
-  Block,
-  DeleteForever,
-  Warning,
-  WorkspacePremium,
+  RefreshCw,
+  ShieldBan,
+  Trash2,
+  TriangleAlert,
+  Crown,
   CheckCircle,
-  OpenInNew,
+  ExternalLink,
   ChevronRight,
   Calendar,
   Shield,
@@ -26,7 +26,6 @@ import {
   Phone,
   MapPin,
   Briefcase,
-  Crown,
   Eye,
   Download,
   Share2,
@@ -134,7 +133,7 @@ export default function AdminUserDetailPage() {
           {/* Account Info */}
           <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
             <div className="flex items-center gap-base mb-lg">
-              <AccountCircle className="h-6 w-6 text-primary" />
+              <UserCircle className="h-6 w-6 text-primary" />
               <h2 className="font-display text-headline-sm">Informações da Conta</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-lg gap-x-xl">
@@ -193,7 +192,7 @@ export default function AdminUserDetailPage() {
               <div className="md:col-span-2 p-md bg-primary-container/10 border border-primary/20 rounded-lg">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-base">
-                    <WorkspacePremium className="h-6 w-6 text-primary" />
+                    <Crown className="h-6 w-6 text-primary" />
                     <div>
                       <p className="font-display text-label-md text-primary font-bold">
                         {user.isPremium ? 'Assinatura Premium' : 'Plano Gratuito'}
@@ -265,7 +264,7 @@ export default function AdminUserDetailPage() {
                 <label className="font-display text-label-sm text-secondary">Slug do Currículo</label>
                 <div className="flex items-center gap-xs text-primary font-display text-label-md">
                   <span>{user.hasProfile ? '/curriculo-slug' : '—'}</span>
-                  {user.hasProfile && <OpenInNew className="h-4 w-4 cursor-pointer" />}
+                  {user.hasProfile && <ExternalLink className="h-4 w-4 cursor-pointer" />}
                 </div>
               </div>
             </div>
@@ -277,7 +276,7 @@ export default function AdminUserDetailPage() {
           {/* Stats */}
           <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-sm">
             <div className="flex items-center gap-base mb-lg">
-              <Analytics className="h-6 w-6 text-primary" />
+              <BarChart3 className="h-6 w-6 text-primary" />
               <h2 className="font-display text-headline-sm">Estatísticas</h2>
             </div>
             <div className="grid grid-cols-2 gap-md">
@@ -331,7 +330,7 @@ export default function AdminUserDetailPage() {
                 className="w-full flex items-center justify-between px-md py-3 border border-outline-variant rounded-lg font-display text-label-md hover:bg-surface-container-low transition-all disabled:opacity-50"
               >
                 <span className="flex items-center gap-3">
-                  <Block className="h-5 w-5 text-secondary" />
+                  <ShieldBan className="h-5 w-5 text-secondary" />
                   {user.isActive ? 'Desativar Conta' : 'Ativar Conta'}
                 </span>
                 {toggleStatus.isPending ? (
@@ -346,7 +345,7 @@ export default function AdminUserDetailPage() {
             <div className="mt-xl pt-lg border-t border-error-container/50">
               <div className="bg-error-container/10 p-md rounded-lg border border-error/10 mb-md">
                 <div className="flex items-center gap-2 mb-xs text-error">
-                  <Warning className="h-5 w-5" />
+                  <TriangleAlert className="h-5 w-5" />
                   <span className="font-display text-label-md font-bold">Ação Crítica</span>
                 </div>
                 <p className="text-body-sm text-error/80 leading-tight">
@@ -357,7 +356,7 @@ export default function AdminUserDetailPage() {
                 onClick={() => setShowDeleteDialog(true)}
                 className="w-full flex items-center justify-center gap-2 px-md py-3 bg-error text-white rounded-lg font-display text-label-md hover:opacity-90 transition-all shadow-lg shadow-error/20"
               >
-                <DeleteForever className="h-5 w-5" />
+                <Trash2 className="h-5 w-5" />
                 Excluir Usuário
               </button>
             </div>

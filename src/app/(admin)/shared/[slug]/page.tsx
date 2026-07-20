@@ -3,15 +3,12 @@
 import { useParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import {
-  Location,
   Mail,
   Phone,
   Download,
   Share2,
   Check,
   ExternalLink,
-  Linkedin,
-  Github,
   Globe,
   MapPin,
   Briefcase,
@@ -243,7 +240,7 @@ export default function SharedResumePage() {
                       <h3 className="font-display text-label-md text-on-surface">{edu.course}</h3>
                       <p className="text-primary text-body-sm mb-base">{edu.institution}</p>
                       <p className="text-on-surface-variant text-body-sm">
-                        {edu.level} &mdash; {formatDate(edu.startDate, 'yyyy')} a {edu.isCurrent ? 'Presente' : formatDate(edu.endDate, 'yyyy')}
+                        {edu.level} &mdash; {formatDate(edu.startDate, 'yyyy')} a {edu.endDate ? formatDate(edu.endDate, 'yyyy') : 'Presente'}
                       </p>
                       <span className="inline-block mt-2 text-label-sm text-secondary font-display bg-surface-container px-2 py-0.5 rounded">
                         {edu.status}
