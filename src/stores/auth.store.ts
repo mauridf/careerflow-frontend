@@ -37,10 +37,11 @@ export const useAuthStore = create<AuthState>()(
           isAdmin: user.role === 'Admin',
           isPremium: user.isPremium || user.role === 'PremiumUser',
         });
-        // Também salva em localStorage para acesso rápido
         localStorage.setItem(TOKEN_KEYS.ACCESS_TOKEN, accessToken);
         localStorage.setItem(TOKEN_KEYS.REFRESH_TOKEN, refreshToken);
         localStorage.setItem(TOKEN_KEYS.ROLE, user.role);
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+        document.cookie = `userRole=${user.role}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       },
 
       logout: () => {
@@ -56,6 +57,8 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem(TOKEN_KEYS.REFRESH_TOKEN);
         localStorage.removeItem(TOKEN_KEYS.USER);
         localStorage.removeItem(TOKEN_KEYS.ROLE);
+        document.cookie = 'accessToken=; path=/; max-age=0';
+        document.cookie = 'userRole=; path=/; max-age=0';
       },
 
       setUser: (user: UserMeResponse) => {
@@ -70,12 +73,14 @@ export const useAuthStore = create<AuthState>()(
         set({ accessToken, refreshToken });
         localStorage.setItem(TOKEN_KEYS.ACCESS_TOKEN, accessToken);
         localStorage.setItem(TOKEN_KEYS.REFRESH_TOKEN, refreshToken);
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       },
 
       updateToken: (accessToken: string, refreshToken: string) => {
         set({ accessToken, refreshToken });
         localStorage.setItem(TOKEN_KEYS.ACCESS_TOKEN, accessToken);
         localStorage.setItem(TOKEN_KEYS.REFRESH_TOKEN, refreshToken);
+        document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
       },
     }),
     {

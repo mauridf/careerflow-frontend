@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
-import { QueryProvider, ThemeProvider, ToastProvider } from '@/providers';
+import { QueryProvider, ThemeProvider, ToastProvider, AuthInit } from '@/providers';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -46,6 +46,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} font-sans antialiased`}
       >
+        <AuthInit />
         <ThemeProvider>
           <QueryProvider>
             <ToastProvider>{children}</ToastProvider>
