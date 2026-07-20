@@ -1,0 +1,11 @@
+export { authService } from './auth.service';
+export { profileService } from './profile.service';
+export { skillsService } from './skills.service';
+export { experiencesService } from './experiences.service';
+export { educationService } from './education.service';
+export { certificatesService } from './certificates.service';
+export { languagesService } from './languages.service';
+export { socialNetworksService } from './social-networks.service';
+export { resumeService } from './resume.service';
+export { dashboardService } from './dashboard.service';
+export { adminService } from './admin.service';
