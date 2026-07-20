@@ -32,6 +32,10 @@ export const ROUTES = {
   ADMIN: '/admin',
   ADMIN_USERS: '/admin/users',
   SHARED_RESUME: '/shared',
+  ONBOARDING: '/onboarding',
+  ONBOARDING_STEP1: '/onboarding/step-1',
+  ONBOARDING_STEP2: '/onboarding/step-2',
+  ONBOARDING_STEP3: '/onboarding/step-3',
 } as const;
 
 export const LIMITS = {
