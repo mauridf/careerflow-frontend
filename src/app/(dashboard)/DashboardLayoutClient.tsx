@@ -59,10 +59,9 @@ const sidebarLinks: SidebarLink[] = [
     icon: BarChart3,
   },
   {
-    href: ROUTES.DASHBOARD + '?tab=insights',
+    href: ROUTES.INSIGHTS,
     label: 'Insights de Carreira',
     icon: Lightbulb,
-    disabled: true,
   },
 ];
 

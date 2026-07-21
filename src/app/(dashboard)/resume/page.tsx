@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
   FileText,
@@ -22,13 +22,14 @@ import {
   useShareResume,
   usePublishResume,
   useUnpublishResume,
-  useDownloadPdf,
 } from '@/hooks';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { formatDate, formatPhone } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
+import { resumeService } from '@/services';
+import { useToast } from '@/hooks/use-toast';
 import { ROUTES } from '@/lib/constants';
 import type { ResumeResponse, PersonInfo } from '@/types';
 
@@ -460,7 +461,44 @@ export default function ResumePage() {
   const shareResume = useShareResume();
   const publishResume = usePublishResume();
   const unpublishResume = useUnpublishResume();
-  const downloadPdf = useDownloadPdf();
+  const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadPdf = useCallback(async () => {
+    setIsDownloading(true);
+    try {
+      const response = await resumeService.generatePdf();
+      const blob = new Blob([response], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'curriculo.pdf';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast({ title: 'Erro ao baixar PDF', description: 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [toast]);
+
+  const handleDownloadAtsPdf = useCallback(async () => {
+    setIsDownloading(true);
+    try {
+      const response = await resumeService.generateAtsPdf();
+      const blob = new Blob([response], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'curriculo-ats.pdf';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast({ title: 'Erro ao baixar PDF ATS', description: 'Tente novamente.', variant: 'destructive' });
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [toast]);
 
   const resume = resumeData?.data;
   const analytics = analyticsData?.data;
@@ -597,11 +635,11 @@ export default function ResumePage() {
         </button>
 
         <button
-          onClick={() => downloadPdf.mutate('standard')}
-          disabled={downloadPdf.isPending}
+          onClick={handleDownloadPdf}
+          disabled={isDownloading}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-display text-label-md text-secondary hover:bg-surface-container-low transition-all border border-outline-variant"
         >
-          {downloadPdf.isPending ? (
+          {isDownloading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Download className="h-4 w-4" />
@@ -610,11 +648,11 @@ export default function ResumePage() {
         </button>
 
         <button
-          onClick={() => downloadPdf.mutate('ats')}
-          disabled={downloadPdf.isPending}
+          onClick={handleDownloadAtsPdf}
+          disabled={isDownloading}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-display text-label-md text-secondary hover:bg-surface-container-low transition-all border border-outline-variant"
         >
-          {downloadPdf.isPending ? (
+          {isDownloading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <FileText className="h-4 w-4" />

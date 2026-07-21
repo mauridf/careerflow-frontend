@@ -21,8 +21,8 @@ import {
   useDashboardStats,
   useDashboardInsights,
   useDashboardActivity,
-  useDashboardViewsChart,
 } from '@/hooks';
+import { ViewsChart } from '@/components/dashboard/ViewsChart';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { formatNumber, formatPercentage, formatDateTime } from '@/lib/formatters';
@@ -41,7 +41,6 @@ export default function DashboardPage() {
 
   const { data: insightsData } = useDashboardInsights();
   const { data: activityData } = useDashboardActivity(5);
-  const { data: chartData } = useDashboardViewsChart(selectedPeriod);
 
   const stats = statsData?.data;
 
@@ -89,8 +88,6 @@ export default function DashboardPage() {
       icon: Share2,
     },
   ];
-
-  const chartBars = chartData?.data?.dataPoints || generatePlaceholderBars(12);
 
   return (
     <div className="flex flex-col gap-lg">
@@ -213,39 +210,8 @@ export default function DashboardPage() {
                 Baixar relatório
               </button>
             </div>
-            {/* Gráfico de Barras */}
-            <div className="flex-grow flex items-end gap-2 h-[240px]">
-              {chartBars.map((bar, index) => {
-                const maxViews = Math.max(...chartBars.map((b) => b.views), 1);
-                const heightPercent = (bar.views / maxViews) * 100;
-                return (
-                  <div
-                    key={index}
-                    className="flex-1 flex flex-col items-center gap-1 group"
-                  >
-                    <div className="w-full flex items-end justify-center h-[200px]">
-                      <div
-                        className="w-full bg-primary-container/20 rounded-t-sm hover:bg-primary transition-all cursor-pointer group-hover:bg-primary/80"
-                        style={{ height: `${Math.max(heightPercent, 4)}%` }}
-                        title={`${bar.period}: ${bar.views} visualizações, ${bar.downloads} downloads`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Labels do Eixo X */}
-            <div className="flex justify-between font-display text-label-sm text-outline">
-              {chartBars.length > 0 && (
-                <>
-                  <span>{chartBars[0]?.period}</span>
-                  <span>
-                    {chartBars[Math.floor(chartBars.length / 2)]?.period}
-                  </span>
-                  <span>{chartBars[chartBars.length - 1]?.period}</span>
-                </>
-              )}
-            </div>
+            {/* Gráfico de Visualizações com Recharts */}
+            <ViewsChart days={selectedPeriod} />
           </div>
 
           {/* Status por Seção */}
@@ -426,11 +392,3 @@ function getActivityIcon(action: string) {
   }
 }
 
-/* Placeholder para gráfico vazio */
-function generatePlaceholderBars(count: number) {
-  return Array.from({ length: count }, (_, i) => ({
-    period: `${String(i + 1).padStart(2, '0')}/01`,
-    views: Math.floor(Math.random() * 50) + 5,
-    downloads: Math.floor(Math.random() * 10),
-  }));
-}
