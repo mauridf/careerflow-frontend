@@ -32,11 +32,13 @@ import {
   useEducation,
   useCertificates,
   useLanguages,
+  useSocialNetworks,
   useDeleteSkill,
   useDeleteExperience,
   useDeleteEducation,
   useDeleteLanguage,
   useDeleteCertificate,
+  useDeleteSocialNetwork,
 } from '@/hooks';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { ErrorState } from '@/components/shared/ErrorState';
@@ -44,7 +46,7 @@ import { EmptyState } from '@/components/shared/EmptyState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { formatDate, formatPhone, formatCityState, formatPercentage, truncateText } from '@/lib/formatters';
-import { SkillCategory, ProficiencyLevel, EducationLevel, EducationStatus, LanguageLevel } from '@/lib/enums';
+import { SkillCategory, ProficiencyLevel, EducationLevel, EducationStatus, LanguageLevel, SocialNetworkType } from '@/lib/enums';
 import { ROUTES } from '@/lib/constants';
 
 export default function ProfilePage() {
@@ -56,16 +58,18 @@ export default function ProfilePage() {
   const { data: educationData, isLoading: educationLoading } = useEducation();
   const { data: languagesData, isLoading: languagesLoading } = useLanguages();
   const { data: certificatesData, isLoading: certificatesLoading } = useCertificates();
+  const { data: socialNetworksData, isLoading: socialNetworksLoading } = useSocialNetworks();
 
   const deleteSkill = useDeleteSkill();
   const deleteExperience = useDeleteExperience();
   const deleteEducation = useDeleteEducation();
   const deleteLanguage = useDeleteLanguage();
   const deleteCertificate = useDeleteCertificate();
+  const deleteSocialNetwork = useDeleteSocialNetwork();
 
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
-    type: 'skill' | 'experience' | 'education' | 'language' | 'certificate';
+    type: 'skill' | 'experience' | 'education' | 'language' | 'certificate' | 'social-network';
     id: string;
     label: string;
   }>({ open: false, type: 'skill', id: '', label: '' });
@@ -77,8 +81,9 @@ export default function ProfilePage() {
   const education = educationData?.data || [];
   const languages = languagesData?.data || [];
   const certificates = certificatesData?.data || [];
+  const socialNetworks = socialNetworksData?.data || [];
 
-  if (profileLoading || skillsLoading || experiencesLoading || educationLoading || languagesLoading || certificatesLoading) {
+  if (profileLoading || skillsLoading || experiencesLoading || educationLoading || languagesLoading || certificatesLoading || socialNetworksLoading) {
     return <LoadingState message="Carregando perfil..." size="lg" />;
   }
 
@@ -108,6 +113,9 @@ export default function ProfilePage() {
         break;
       case 'certificate':
         deleteCertificate.mutate(deleteDialog.id);
+        break;
+      case 'social-network':
+        deleteSocialNetwork.mutate(deleteDialog.id);
         break;
     }
     setDeleteDialog({ open: false, type: 'skill', id: '', label: '' });
@@ -583,6 +591,72 @@ export default function ProfilePage() {
           )}
         </div>
 
+        {/* Redes Sociais */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-level-1">
+          <div className="flex justify-between items-center mb-md">
+            <h3 className="font-display text-headline-sm text-on-surface">
+              Redes Sociais
+            </h3>
+            <Link
+              href={ROUTES.SOCIAL_NETWORKS}
+              className="text-secondary hover:text-primary transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </Link>
+          </div>
+          {socialNetworks.length > 0 ? (
+            <div className="space-y-3">
+              {socialNetworks.slice(0, 5).map((sn) => (
+                <div
+                  key={sn.id}
+                  className="flex items-center justify-between p-3 rounded-xl bg-surface border border-outline-variant group"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="shrink-0">
+                      <Globe className="h-4 w-4 text-secondary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-sans text-body-sm text-on-surface truncate">
+                        {SocialNetworkType[sn.networkType as unknown as number] || sn.networkType}
+                      </p>
+                      <p className="text-[12px] text-secondary truncate">{sn.url}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() =>
+                      setDeleteDialog({
+                        open: true,
+                        type: 'social-network',
+                        id: sn.id,
+                        label: SocialNetworkType[sn.networkType as unknown as number] || sn.networkType,
+                      })
+                    }
+                    className="opacity-0 group-hover:opacity-100 text-secondary hover:text-error transition-all shrink-0"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {socialNetworks.length > 5 && (
+                <Link
+                  href={ROUTES.SOCIAL_NETWORKS}
+                  className="block text-center text-secondary hover:text-primary font-sans text-body-sm py-2"
+                >
+                  Ver todas ({socialNetworks.length})
+                </Link>
+              )}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Globe}
+              title="Nenhuma rede social"
+              description="Adicione links para seus perfis profissionais."
+              actionLabel="Adicionar Rede Social"
+              onAction={() => router.push(ROUTES.SOCIAL_NETWORKS)}
+            />
+          )}
+        </div>
+
         {/* Formação */}
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-level-1 md:col-span-2">
           <div className="flex justify-between items-center mb-md">
@@ -660,13 +734,13 @@ export default function ProfilePage() {
       <ConfirmDialog
         open={deleteDialog.open}
         onOpenChange={(open) => setDeleteDialog((prev) => ({ ...prev, open }))}
-        title={`Remover ${deleteDialog.type === 'skill' ? 'habilidade' : deleteDialog.type === 'experience' ? 'experiência' : deleteDialog.type === 'education' ? 'formação' : deleteDialog.type === 'language' ? 'idioma' : 'certificação'}`}
+        title={`Remover ${deleteDialog.type === 'skill' ? 'habilidade' : deleteDialog.type === 'experience' ? 'experiência' : deleteDialog.type === 'education' ? 'formação' : deleteDialog.type === 'language' ? 'idioma' : deleteDialog.type === 'social-network' ? 'rede social' : 'certificação'}`}
         description={`Tem certeza que deseja remover "${deleteDialog.label}"? Esta ação não pode ser desfeita.`}
         confirmLabel="Remover"
         variant="destructive"
         onConfirm={handleDelete}
         loading={
-          deleteSkill.isPending || deleteExperience.isPending || deleteEducation.isPending || deleteLanguage.isPending || deleteCertificate.isPending
+          deleteSkill.isPending || deleteExperience.isPending || deleteEducation.isPending || deleteLanguage.isPending || deleteCertificate.isPending || deleteSocialNetwork.isPending
         }
       />
     </div>
