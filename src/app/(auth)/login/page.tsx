@@ -63,8 +63,8 @@ export default function LoginPage() {
         </header>
 
         {/* Auth Card */}
-        <section className="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-lg md:p-xl" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-md">
+        <section className="w-full bg-surface-container-lowest rounded-xl border border-outline-variant/30 p-xl" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.04)' }}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-lg">
             {/* Email Field */}
             <div className="flex flex-col">
               <label
